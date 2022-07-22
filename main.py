@@ -29,6 +29,7 @@ if __name__ == '__main__':
                         break
                 time.sleep(6)
     except SystemExit:
+        print('Exiting the program')
         raise
     finally:
         if os.path.exists("monitor-1.png"):
