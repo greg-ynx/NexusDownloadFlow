@@ -5,12 +5,14 @@ import pyautogui
 import cv2
 from mss import mss
 
+from config.definitions import assets_dir
+
 if __name__ == '__main__':
     print('NexusFlow 2022 starting...')
     try:
-        templates = [cv2.imread('assets/template1.png'),
-                     cv2.imread('assets/template2.png'),
-                     cv2.imread('assets/template3.png')]
+        templates = [cv2.imread(os.path.join(assets_dir, 'template1.png')),
+                     cv2.imread(os.path.join(assets_dir, 'template2.png')),
+                     cv2.imread(os.path.join(assets_dir, 'template3.png'))]
         with mss() as sct:
             while True:
                 for i in range(1, 4):
