@@ -34,6 +34,7 @@ if __name__ == '__main__':
         print('Exiting the program')
         raise
     finally:
+        time.sleep(5)
         if os.path.exists("monitor-1.png"):
             os.remove("monitor-1.png")
         else:
