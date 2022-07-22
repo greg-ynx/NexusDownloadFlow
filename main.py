@@ -29,10 +29,10 @@ if __name__ == '__main__':
                         break
                 time.sleep(6)
     except SystemExit:
+        raise
+    finally:
         if os.path.exists("monitor-1.png"):
             os.remove("monitor-1.png")
         else:
             print("The file does not exist")
-        raise
-    finally:
         print('Program ended')
