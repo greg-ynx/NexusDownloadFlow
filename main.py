@@ -8,7 +8,9 @@ from mss import mss
 from config.definitions import assets_dir
 
 if __name__ == '__main__':
-    print('NexusFlow 2022 starting...')
+    print('NexusDownloadFlow 2022 starting...')
+    print('Do not forget to replace the assets templates (1, 2 & 3) in order to match with the screenshots '
+          'taken from your monitor!')
     try:
         templates = [cv2.imread(os.path.join(assets_dir, 'template1.png')),
                      cv2.imread(os.path.join(assets_dir, 'template2.png')),
@@ -31,7 +33,7 @@ if __name__ == '__main__':
                         break
                 time.sleep(6)
     except SystemExit:
-        print('Exiting the program')
+        print('Exiting the program...')
         raise
     finally:
         time.sleep(5)
