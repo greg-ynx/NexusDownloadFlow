@@ -7,14 +7,25 @@ from mss import mss
 
 from config.definitions import assets_dir
 
+
+# TODO: use DRY principle
+# TODO: use type hints
+# TODO: use doc comments for every function
+# TODO: add logs through the script and generate a log file based on the running day
+# TODO: may add unit test
+
+def init_templates() -> list:
+    return [cv2.imread(os.path.join(assets_dir, 'template1.png')),
+            cv2.imread(os.path.join(assets_dir, 'template2.png')),
+            cv2.imread(os.path.join(assets_dir, 'template3.png'))]
+
+
 if __name__ == '__main__':
-    print('NexusDownloadFlow 2022 starting...')
+    print('NexusDownloadFlow is starting...')
     print('Do not forget to replace the assets templates (1, 2 & 3) in order to match with the screenshots '
           'taken from your monitor!')
     try:
-        templates = [cv2.imread(os.path.join(assets_dir, 'template1.png')),
-                     cv2.imread(os.path.join(assets_dir, 'template2.png')),
-                     cv2.imread(os.path.join(assets_dir, 'template3.png'))]
+        templates: list = init_templates()
         with mss() as sct:
             while True:
                 for i in range(1, 4):
