@@ -1,0 +1,12 @@
+# Configuration file
+name = "NexusDownloadFlow"
+version = "2.0.0"
+author = "greg-ynx"
+release_date = 2023-10-01
+
+[github]
+owner = "greg-ynx"
+repository = "https://github.com/greg-ynx/NexusDownloadFlow"
+
+[python]
+version = "3.11.5"

@@ -8,7 +8,7 @@ from cv2.typing import MatLike
 from mss import mss
 from mss.base import MSSBase
 
-from config.definitions import assets_dir
+from config.definitions import ASSETS_DIR
 
 
 # TODO: use doc comments for every function
@@ -16,17 +16,19 @@ from config.definitions import assets_dir
 # TODO: may add unit test
 
 def init_templates() -> list[MatLike]:
-    return [cv2.imread(os.path.join(assets_dir, 'template1.png')),
-            cv2.imread(os.path.join(assets_dir, 'template2.png')),
-            cv2.imread(os.path.join(assets_dir, 'template3.png'))]
+    return [cv2.imread(os.path.join(ASSETS_DIR, 'template1.png')),
+            cv2.imread(os.path.join(ASSETS_DIR, 'template2.png')),
+            cv2.imread(os.path.join(ASSETS_DIR, 'template3.png'))]
 
 
 def click_on_target(match_location: Sequence[int], template_shape: tuple[int, ...]) -> None:
     top_left_x: int
     top_left_y: int
     top_left_x, top_left_y = match_location
+    original_position = pyautogui.position()
     target = (top_left_x + template_shape[1] / 2, top_left_y + template_shape[0] / 2)
     pyautogui.leftClick(target)
+    pyautogui.moveTo(original_position)
 
 
 def search_template(mss_instance: MSSBase, threshold: float) -> None:
