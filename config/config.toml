@@ -1,6 +1,6 @@
 # Configuration file
 name = "NexusDownloadFlow"
-version = "2.0.0"
+version = "2.0.0-SNAPSHOT"
 author = "greg-ynx"
 release_date = 2023-10-01
 
