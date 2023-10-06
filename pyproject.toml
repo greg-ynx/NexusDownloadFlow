@@ -1,0 +1,21 @@
+[tool.ruff]
+extend-select = [
+    "W",
+    "I",
+    "N",
+    "D",
+    "S",
+    "T20",
+    "C4",
+    "SIM",
+    "TCH"
+]
+ignore = [
+    "D203",
+    "D212"
+]
+fix = true
+show-fixes = true
+show-source = false
+line-length = 120
+target-version = "py311"
