@@ -6,9 +6,11 @@ Mods` in which you have to manually click on `Slow download` button if your Nexu
 ## How to use NexusDownloadFlow?
 
 ### Without Wabbajack
+
 Execute `NexusDownloadFlow.exe` and open your Nexus Mods download page.
 
 ### With Wabbajack
+
 Execute `NexusDownloadFlow.exe` while the mod list is downloading.
 
 ## Auto-clicker is not clicking
