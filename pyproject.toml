@@ -1,3 +1,21 @@
+[project]
+name = "NexusDownloadFlow"
+version = "2.0.0-SNAPSHOT"
+authors = [
+    {name = "Gregory Ployart", email = "greg.ynx@gmail.com", alias = "greg-ynx"},
+]
+description = "Auto-clicker program to automate Nexus modlist downloads for free."
+readme = "README.md"
+requires-python = ">=3.11"
+release-date = 2023-10-01
+
+[github]
+owner = "greg-ynx"
+repository = "https://github.com/greg-ynx/NexusDownloadFlow"
+
+[python]
+version = "3.11.5"
+
 [tool.ruff]
 extend-select = [
     "W",
