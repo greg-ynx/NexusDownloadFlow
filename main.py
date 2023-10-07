@@ -8,7 +8,8 @@ from cv2.typing import MatLike
 from mss import mss
 from mss.base import MSSBase
 
-from config.definitions import ASSETS_DIR
+from config.ascii_art import print_ascii_art
+from config.definitions import ASSETS_DIRECTORY
 
 # TODO: use doc comments for every function
 # TODO: add logs through the script and generate a log file based on the running day
@@ -25,9 +26,9 @@ def init_templates() -> list[MatLike]:
     :return: list of templates
     """
     return [
-        cv2.imread(os.path.join(ASSETS_DIR, "template1.png")),
-        cv2.imread(os.path.join(ASSETS_DIR, "template2.png")),
-        cv2.imread(os.path.join(ASSETS_DIR, "template3.png"))
+        cv2.imread(os.path.join(ASSETS_DIRECTORY, "template1.png")),
+        cv2.imread(os.path.join(ASSETS_DIRECTORY, "template2.png")),
+        cv2.imread(os.path.join(ASSETS_DIRECTORY, "template3.png"))
     ]
 
 
@@ -76,6 +77,7 @@ def main() -> None:
 
     :raise SystemExit: raised when the window is closed
     """
+    print_ascii_art()
     print("NexusDownloadFlow is starting...")
     print(
         "Do not forget to replace the assets templates (1, 2 & 3) in order to match with the screenshots "
