@@ -1,6 +1,6 @@
 # NexusDownloadFlow: Auto-downloader for Nexus Mods
 
-NexusDownloadFlow (NDF) is a program that automates the download process with `Wabbajack modlist installation of Nexus 
+NexusDownloadFlow (NDF) is a program that automates the download process with `Wabbajack modlist installation of Nexus
 Mods` in which you have to manually click on `Slow download` button if your Nexus Mods account is not premium.
 
 ## How to use NexusDownloadFlow?
