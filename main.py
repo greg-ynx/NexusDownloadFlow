@@ -10,18 +10,34 @@ from mss.base import MSSBase
 
 from config.definitions import ASSETS_DIR
 
-
 # TODO: use doc comments for every function
 # TODO: add logs through the script and generate a log file based on the running day
 # TODO: may add unit test
 
+
+SCREENSHOT: str = "screenshot.png"
+
+
 def init_templates() -> list[MatLike]:
-    return [cv2.imread(os.path.join(ASSETS_DIR, 'template1.png')),
-            cv2.imread(os.path.join(ASSETS_DIR, 'template2.png')),
-            cv2.imread(os.path.join(ASSETS_DIR, 'template3.png'))]
+    """
+    Return the list of templates.
+
+    :return: list of templates
+    """
+    return [
+        cv2.imread(os.path.join(ASSETS_DIR, "template1.png")),
+        cv2.imread(os.path.join(ASSETS_DIR, "template2.png")),
+        cv2.imread(os.path.join(ASSETS_DIR, "template3.png"))
+    ]
 
 
 def click_on_target(match_location: Sequence[int], template_shape: tuple[int, ...]) -> None:
+    """
+    Click on the target that has been identified and move the cursor to its previous location.
+
+    :param Sequence[int] match_location: the coordinates of the pixels located at the top left of the matched image.
+    :param tuple[int, ...] template_shape: the shape of the corresponding template
+    """
     top_left_x: int
     top_left_y: int
     top_left_x, top_left_y = match_location
@@ -32,41 +48,57 @@ def click_on_target(match_location: Sequence[int], template_shape: tuple[int, ..
 
 
 def search_template(mss_instance: MSSBase, threshold: float) -> None:
+    """
+    Search and identify an image matching any templates with the specified threshold.
+
+    :param MSSBase mss_instance: an instance of MSSBase
+    :param float threshold: the threshold required to identify a match.
+    """
     template: MatLike
     for template in init_templates():
         template_gray: MatLike = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-        screenshot: str = next(mss_instance.save(mon=-1, output='screenshot.png'))
+        screenshot: str = next(mss_instance.save(mon=-1, output=SCREENSHOT))
         screenshot_gray: MatLike = cv2.cvtColor(cv2.imread(screenshot), cv2.COLOR_BGR2GRAY)
         match_template: MatLike = cv2.matchTemplate(screenshot_gray, template_gray, cv2.TM_SQDIFF)
         min_value: float
         min_loc: Sequence[int]
         min_value, _, min_loc, _ = cv2.minMaxLoc(match_template)
         if min_value < threshold:
-            print('Matching template!')
+            print("Matching template!")
             click_on_target(min_loc, template_gray.shape)
+            time.sleep(6)
             break
 
 
 def main() -> None:
-    print('NexusDownloadFlow is starting...')
-    print('Do not forget to replace the assets templates (1, 2 & 3) in order to match with the screenshots '
-          'taken from your monitor!')
+    """
+    NexusDownloadFlow main function.
+
+    :raise SystemExit: raised when the window is closed
+    """
+    print("NexusDownloadFlow is starting...")
+    print(
+        "Do not forget to replace the assets templates (1, 2 & 3) in order to match with the screenshots "
+        "taken from your monitor!"
+    )
     try:
         threshold: int = 3000
         with mss() as mss_instance:
             while True:
                 search_template(mss_instance, threshold)
-                time.sleep(6)
     except SystemExit:
-        print('Exiting the program...')
+        print("Exiting the program...")
         raise
+    # except FailSafeException:
+    #     # log error
+    #     raise
     finally:
-        if os.path.exists("screenshot.png"):
-            os.remove("screenshot.png")
+        if os.path.exists(SCREENSHOT):
+            os.remove(SCREENSHOT)
         else:
             print("The file does not exist")
-        print('Program ended')
+        print("Program ended")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
