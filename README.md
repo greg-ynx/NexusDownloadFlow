@@ -24,7 +24,7 @@ If your issue persists, maximize the Nexus Mods page.
 
 ## Your issue still persist?
 
-Open an issue here, and if possible, give the scenario in which you had this issue, which version of NDF you are using
+Open an issue [here](https://github.com/greg-ynx/NexusDownloadFlow/issues/new), and if possible, give the scenario in which you had this issue, which version of NDF you are using
 and provide a screenshot of your logs or the contents of your current `nexus-download-flow-logs.log` file.
 
 ## Credits
