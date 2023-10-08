@@ -25,5 +25,5 @@ PROJECT_VERSION: str = "v{0}".format(str(PROJECT_DATA.get("version")))
 
 
 def print_ascii_art() -> None:
+    """Print NexusDownloadFlow ascii art with project version."""
     sys.stdout.write(ASCII_COLOR + ASCII_TEXT + PROJECT_VERSION + "\033[0m\n")
-print_ascii_art()

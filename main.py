@@ -1,6 +1,7 @@
+"""Main executable file of NexusDownloadFlow."""
 import os
 import time
-from typing import Sequence
+from typing import Optional, Sequence
 
 import cv2
 import pyautogui
@@ -57,6 +58,8 @@ def search_template(mss_instance: MSSBase, threshold: float) -> None:
     """
     template: MatLike
     for template in init_templates():
+        monitors_size: dict[str, int] = mss_instance.monitors[0]
+        monitors_left_top: Sequence[Optional[int]] = (monitors_size.get('left'), monitors_size.get('top'))
         template_gray: MatLike = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         screenshot: str = next(mss_instance.save(mon=-1, output=SCREENSHOT))
         screenshot_gray: MatLike = cv2.cvtColor(cv2.imread(screenshot), cv2.COLOR_BGR2GRAY)
@@ -64,6 +67,8 @@ def search_template(mss_instance: MSSBase, threshold: float) -> None:
         min_value: float
         min_loc: Sequence[int]
         min_value, _, min_loc, _ = cv2.minMaxLoc(match_template)
+        if monitors_left_top[0] is not None and monitors_left_top[1] is not None:
+            min_loc = (min_loc[0] + monitors_left_top[0], min_loc[1] + monitors_left_top[1])
         if min_value < threshold:
             print("Matching template!")
             click_on_target(min_loc, template_gray.shape)
