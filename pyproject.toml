@@ -27,7 +27,6 @@ warn_return_any = true
 show_error_codes = true
 warn_unused_ignores = true
 
-
 [tool.ruff]
 extend-select = [
     "W",

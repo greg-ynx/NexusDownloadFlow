@@ -1,9 +1,10 @@
 """Main executable file of NexusDownloadFlow."""
 import os
 import time
-from typing import Optional, Sequence
+from typing import Any, Optional, Sequence
 
 import cv2
+import numpy as np
 import pyautogui
 from cv2.typing import MatLike
 from mss import mss
@@ -12,15 +13,21 @@ from mss.base import MSSBase
 from config.ascii_art import print_ascii_art
 from config.definitions import ASSETS_DIRECTORY
 
-# TODO: use doc comments for every function
 # TODO: add logs through the script and generate a log file based on the running day
 # TODO: may add unit test
 
 
 SCREENSHOT: str = "screenshot.png"
+CHUNK_SLICES: list[float] = [
+    1., .95789474, .91578947, .87368421, .83157895, .78947368,
+    .74736842, .70526316, .66315789, .62105263, .57894737, .53684211,
+    .49473684, .45263158, .41052632, .36842105, .32631579, .28421053,
+    .24210526, .2
+]
+THRESHOLD: int = 3000
 
 
-def init_templates() -> list[MatLike]:
+def load_templates() -> list[MatLike]:
     """
     Return the list of templates.
 
@@ -29,8 +36,17 @@ def init_templates() -> list[MatLike]:
     return [
         cv2.imread(os.path.join(ASSETS_DIRECTORY, "template1.png")),
         cv2.imread(os.path.join(ASSETS_DIRECTORY, "template2.png")),
-        cv2.imread(os.path.join(ASSETS_DIRECTORY, "template3.png"))
+        cv2.imread(os.path.join(ASSETS_DIRECTORY, "template3.png")),
     ]
+
+
+def init_templates() -> list[MatLike]:
+    """
+    Return the list of edges for each template.
+
+    :return: list of templates' edges
+    """
+    return [cv2.Canny(cv2.cvtColor(template, cv2.COLOR_BGR2GRAY), 50, 200) for template in load_templates().copy()]
 
 
 def click_on_target(match_location: Sequence[int], template_shape: tuple[int, ...]) -> None:
@@ -57,7 +73,7 @@ def search_template(mss_instance: MSSBase, threshold: float) -> None:
     :param float threshold: the threshold required to identify a match.
     """
     template: MatLike
-    for template in init_templates():
+    for template in load_templates():
         monitors_size: dict[str, int] = mss_instance.monitors[0]
         monitors_left_top: Sequence[Optional[int]] = (monitors_size.get('left'), monitors_size.get('top'))
         template_gray: MatLike = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
@@ -89,10 +105,9 @@ def main() -> None:
         "taken from your monitor!"
     )
     try:
-        threshold: int = 3000
         with mss() as mss_instance:
             while True:
-                search_template(mss_instance, threshold)
+                search_template(mss_instance, THRESHOLD)
     except SystemExit:
         print("Exiting the program...")
         raise
