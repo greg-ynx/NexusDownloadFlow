@@ -1,4 +1,5 @@
 """Main executable file of NexusDownloadFlow."""
+import logging
 import os
 import sys
 from time import sleep
@@ -11,6 +12,7 @@ from pyautogui import Point, leftClick, moveTo, position
 
 from config.ascii_art import print_ascii_art
 from config.definitions import ASSETS_DIRECTORY
+from config.ndf_logging import delete_logfile, setup_logging
 
 # TODO: add logs through the script and generate a log file based on the running day
 # TODO: may add unit test
@@ -53,7 +55,7 @@ def init_templates() -> list[MatLike]:
     """
     Return the list of edged templates.
 
-    :return: List of edged templates
+    :return: list of edged templates
     """
     return [Canny(cvtColor(template, COLOR_BGR2GRAY), EDGE_MIN_VALUE, EDGE_MAX_VALUE) for template in TEMPLATES]
 
@@ -62,8 +64,8 @@ def resize_screenshot(screenshot: MatLike, scale: float) -> MatLike:
     """
     Resize the input screenshot.
 
-    :param screenshot: Screenshot to resize
-    :param scale: Factor to resize the screenshot
+    :param screenshot: screenshot to resize
+    :param scale: the scale factor to resize the screenshot
     :return: resized screenshot.
     """
     new_width: int = int(screenshot.shape[1] * scale)
@@ -75,7 +77,7 @@ def get_potential_match(screenshot: MatLike, template: MatLike) -> tuple[float, 
     """
     Get the potential match value and its location.
 
-    :param screenshot: Source for template matching
+    :param screenshot: source for template matching
     :param template: template to match
     :return: potential match value and location.
     """
@@ -90,7 +92,7 @@ def if_monitors_left_top_present(monitors_size: dict[str, int]) -> tuple[int, in
     """
     Handle Optional of monitors_left_top (if_present like).
 
-    :param monitors_size: Dictionary containing left and top properties of the system's monitor(s)
+    :param monitors_size: dictionary containing left and top properties of the system's monitor(s)
     :return: if present, the left-top pixel's coordinates of the system's monitor(s).
     """
     monitors_left: int | None = monitors_size.get("left")
@@ -106,8 +108,8 @@ def is_match_found(match_value: float) -> bool:
     """
     Check if a match is found.
 
-    :param match_value: Value of the match to check
-    :return: Whether the match is found or not.
+    :param match_value: value of the match to check
+    :return: whether the match is found or not.
     """
     return match_value > THRESHOLD
 
@@ -118,10 +120,10 @@ def multiscale_match_template(
     """
     Apply multiscale template matching algorithm.
 
-    :param templates: List of edged templates to match
+    :param templates: list of edged templates to match
     :param screenshot: screenshot where the search is running
     :param left_top_coordinates: left-top pixel of the system monitor(s)
-    :return:
+    :return: None
     """
     for scale in SCALES:
         resized_screenshot: MatLike = resize_screenshot(screenshot, scale)
@@ -131,7 +133,7 @@ def multiscale_match_template(
             potential_match_value: float = potential_match[0]
             potential_match_location: Sequence[int] = potential_match[1]
             if is_match_found(potential_match_value):
-                print("Match found!")
+                logging.info("Match found!")
                 match_location_x: int = potential_match_location[0]
                 match_location_y: int = potential_match_location[1]
                 match_left_top_location: tuple[int, int] = (
@@ -153,7 +155,8 @@ def click_on_target(target_location: tuple[float, float]) -> None:
     """
     Click on the target that has been identified and move the cursor to its previous location.
 
-    :param target_location: Target coordinates
+    :param target_location: tuple of target coordinates
+    :return: None
     """
     original_position: Point | tuple[int, int] = position()
     leftClick(target_location)
@@ -166,13 +169,16 @@ def main() -> None:
 
     :raises SystemExit: raised when closing program
     :raises KeyboardInterrupt: raised when the user interrupts the program
+    :return: None
     """
+    setup_logging()
+    keep_logfile: bool = False
     print_ascii_art()
-    print("NexusDownloadFlow is starting...")
+    logging.info("NexusDownloadFlow is starting...")
     edged_templates: list[MatLike] = init_templates()
     try:
         with mss() as mss_instance:
-            print("NexusDownloadFlow is running")
+            logging.info("NexusDownloadFlow is running")
             while True:
                 monitors_size: dict[str, int] = mss_instance.monitors[0]
                 monitors_left_top: tuple[int, int] = if_monitors_left_top_present(monitors_size)
@@ -180,7 +186,7 @@ def main() -> None:
                 grayscale_screenshot: MatLike = cvtColor(screenshot, COLOR_BGR2GRAY)
                 multiscale_match_template(edged_templates, grayscale_screenshot, monitors_left_top)
     except (SystemExit, KeyboardInterrupt):
-        print("Exiting the program...")
+        logging.info("Exiting the program...")
         sys.exit(0)
     # except FailSafeException:
     #     # log error
@@ -189,8 +195,10 @@ def main() -> None:
         if os.path.exists(SCREENSHOT):
             os.remove(SCREENSHOT)
         else:
-            print("The file does not exist")
-        print("Program ended")
+            logging.warning("The screenshot does not exist")
+        logging.info("Program ended")
+        if not keep_logfile:
+            delete_logfile()
 
 
 if __name__ == "__main__":
