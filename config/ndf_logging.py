@@ -71,3 +71,15 @@ def delete_logfile() -> None:
     if os.path.exists(logfile_path):
         os.remove(path=logfile_path)
         logging.debug("Logfile deleted.")
+
+
+def logging_report() -> None:
+    """
+    Log report to open an issue on the project's repository.
+
+    :return: None.
+    """
+    logging.critical(
+        "Please report this exception to our repository on GitHub: "
+        "https://github.com/greg-ynx/NexusDownloadFlow/issues?q=is%3Aissue+is%3Aopen"
+    )
