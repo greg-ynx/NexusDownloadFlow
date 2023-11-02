@@ -8,11 +8,11 @@ from typing import Sequence, cast
 from cv2 import COLOR_BGR2GRAY, TM_CCOEFF_NORMED, Canny, cvtColor, imread, matchTemplate, minMaxLoc, resize
 from cv2.typing import MatLike
 from mss import mss
-from pyautogui import Point, leftClick, moveTo, position
+from pyautogui import FailSafeException, Point, leftClick, moveTo, position
 
 from config.ascii_art import print_ascii_art
 from config.definitions import ASSETS_DIRECTORY
-from config.ndf_logging import delete_logfile, setup_logging
+from config.ndf_logging import delete_logfile, get_logfile_path, setup_logging
 
 # TODO: add logs through the script and generate a log file based on the running day
 # TODO: may add unit test
@@ -55,7 +55,7 @@ def init_templates() -> list[MatLike]:
     """
     Return the list of edged templates.
 
-    :return: list of edged templates
+    :return: List of edged templates.
     """
     return [Canny(cvtColor(template, COLOR_BGR2GRAY), EDGE_MIN_VALUE, EDGE_MAX_VALUE) for template in TEMPLATES]
 
@@ -64,9 +64,9 @@ def resize_screenshot(screenshot: MatLike, scale: float) -> MatLike:
     """
     Resize the input screenshot.
 
-    :param screenshot: screenshot to resize
-    :param scale: the scale factor to resize the screenshot
-    :return: resized screenshot.
+    :param screenshot: Screenshot to resize.
+    :param scale: The scale factor to resize the screenshot.
+    :return: Resized screenshot.
     """
     new_width: int = int(screenshot.shape[1] * scale)
     new_height: int = int(screenshot.shape[0] * scale)
@@ -77,9 +77,9 @@ def get_potential_match(screenshot: MatLike, template: MatLike) -> tuple[float, 
     """
     Get the potential match value and its location.
 
-    :param screenshot: source for template matching
-    :param template: template to match
-    :return: potential match value and location.
+    :param screenshot: Source for template matching.
+    :param template: Template to match.
+    :return: Potential match value and location.
     """
     matches: MatLike = matchTemplate(screenshot, template, TM_CCOEFF_NORMED)
     potential_match: tuple[float, float, Sequence[int], Sequence[int]] = minMaxLoc(matches)
@@ -92,15 +92,19 @@ def if_monitors_left_top_present(monitors_size: dict[str, int]) -> tuple[int, in
     """
     Handle Optional of monitors_left_top (if_present like).
 
-    :param monitors_size: dictionary containing left and top properties of the system's monitor(s)
-    :return: if present, the left-top pixel's coordinates of the system's monitor(s).
+    :param monitors_size: Dictionary containing left and top properties of the system's monitor(s).
+    :return: If present, the left-top pixel's coordinates of the system's monitor(s).
     """
+
+    def error_message(_key: str) -> str:
+        return f"Monitors' size '{_key}' value is None."
+
     monitors_left: int | None = monitors_size.get("left")
     monitors_top: int | None = monitors_size.get("top")
     if monitors_left is None:
-        raise ValueError("monitors_size 'left' value is None")
+        raise ValueError(error_message("left"))
     if monitors_top is None:
-        raise ValueError("monitors_size 'top' value is None")
+        raise ValueError(error_message("top"))
     return monitors_left, monitors_top
 
 
@@ -108,8 +112,8 @@ def is_match_found(match_value: float) -> bool:
     """
     Check if a match is found.
 
-    :param match_value: value of the match to check
-    :return: whether the match is found or not.
+    :param match_value: Value of the match to check.
+    :return: Whether the match is found or not.
     """
     return match_value > THRESHOLD
 
@@ -120,9 +124,9 @@ def multiscale_match_template(
     """
     Apply multiscale template matching algorithm.
 
-    :param templates: list of edged templates to match
-    :param screenshot: screenshot where the search is running
-    :param left_top_coordinates: left-top pixel of the system monitor(s)
+    :param templates: List of edged templates to match.
+    :param screenshot: Screenshot where the search is running.
+    :param left_top_coordinates: Left-top pixel of the system monitor(s).
     :return: None
     """
     for scale in SCALES:
@@ -155,7 +159,7 @@ def click_on_target(target_location: tuple[float, float]) -> None:
     """
     Click on the target that has been identified and move the cursor to its previous location.
 
-    :param target_location: tuple of target coordinates
+    :param target_location: Tuple of target coordinates.
     :return: None
     """
     original_position: Point | tuple[int, int] = position()
@@ -167,8 +171,10 @@ def main() -> None:
     """
     NexusDownloadFlow main function.
 
-    :raises SystemExit: raised when closing program
-    :raises KeyboardInterrupt: raised when the user interrupts the program
+    :raises SystemExit: Raised when closing the program.
+    :raises KeyboardInterrupt: Raised when the user interrupts the program.
+    :raises ValueError: Should not be raised (open an issue on GitHub if it happens).
+    :raises Exception: For currently unknown exceptions (open an issue on GitHub if it happens).
     :return: None
     """
     setup_logging()
@@ -178,7 +184,7 @@ def main() -> None:
     edged_templates: list[MatLike] = init_templates()
     try:
         with mss() as mss_instance:
-            logging.info("NexusDownloadFlow is running")
+            logging.info("NexusDownloadFlow is running.")
             while True:
                 monitors_size: dict[str, int] = mss_instance.monitors[0]
                 monitors_left_top: tuple[int, int] = if_monitors_left_top_present(monitors_size)
@@ -188,16 +194,24 @@ def main() -> None:
     except (SystemExit, KeyboardInterrupt):
         logging.info("Exiting the program...")
         sys.exit(0)
-    # except FailSafeException:
-    #     # log error
-    #     raise
+    except FailSafeException:
+        logging.error("Fail-safe triggered from mouse moving to a corner of the screen.")
+        keep_logfile = True
+    except ValueError as e:
+        logging.error(e)
+        keep_logfile = True
+    except Exception as e:
+        logging.exception(e)
+        keep_logfile = True
     finally:
         if os.path.exists(SCREENSHOT):
             os.remove(SCREENSHOT)
         else:
-            logging.warning("The screenshot does not exist")
-        logging.info("Program ended")
-        if not keep_logfile:
+            logging.warning("The screenshot does not exist.")
+        logging.info("Program ended.")
+        if keep_logfile:
+            logging.info(f"Find logfile at: { get_logfile_path() }")
+        else:
             delete_logfile()
 
 

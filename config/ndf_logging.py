@@ -18,7 +18,7 @@ def _setup_logfile_path() -> str:
     """
     Set up logfile.
 
-    :return: logfile path
+    :return: Logfile path.
     """
     return os.path.join(LOGS_DIRECTORY, _LOGFILE_NAME)
 
@@ -27,7 +27,7 @@ def _stop_logging() -> None:
     """
     Shut down the logger listener.
 
-    :return: None
+    :return: None.
     """
     logging.shutdown()
 
@@ -39,7 +39,7 @@ def get_logfile_path() -> str:
     """
     Getter for the current logfile path.
 
-    :return: logfile path
+    :return: Logfile path.
     """
     return _setup_logfile_path()
 
@@ -48,7 +48,7 @@ def setup_logging() -> None:
     """
     Set up logging configuration.
 
-    :return: None
+    :return: None.
     """
     logging.basicConfig(
         level=logging.INFO,
@@ -63,7 +63,7 @@ def delete_logfile() -> None:
     """
     Delete the logfile.
 
-    :return: None
+    :return: None.
     """
     logging.debug("Try to delete the current logfile...")
     logfile_path: str = get_logfile_path()
