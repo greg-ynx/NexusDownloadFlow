@@ -1,14 +1,13 @@
 """Main executable file of NexusDownloadFlow."""
 import os
-import time
-from typing import Any, Optional, Sequence
+import sys
+from time import sleep
+from typing import Sequence, cast
 
-import cv2
-import numpy as np
-import pyautogui
+from cv2 import COLOR_BGR2GRAY, TM_CCOEFF_NORMED, Canny, cvtColor, imread, matchTemplate, minMaxLoc, resize
 from cv2.typing import MatLike
 from mss import mss
-from mss.base import MSSBase
+from pyautogui import Point, leftClick, moveTo, position
 
 from config.ascii_art import print_ascii_art
 from config.definitions import ASSETS_DIRECTORY
@@ -17,100 +16,172 @@ from config.definitions import ASSETS_DIRECTORY
 # TODO: may add unit test
 
 
-SCREENSHOT: str = "screenshot.png"
-CHUNK_SLICES: list[float] = [
-    1., .95789474, .91578947, .87368421, .83157895, .78947368,
-    .74736842, .70526316, .66315789, .62105263, .57894737, .53684211,
-    .49473684, .45263158, .41052632, .36842105, .32631579, .28421053,
-    .24210526, .2
+EDGE_MIN_VALUE: int = 50
+EDGE_MAX_VALUE: int = 200
+SCALES: list[float] = [
+    1.0,
+    0.95789474,
+    0.91578947,
+    0.87368421,
+    0.83157895,
+    0.78947368,
+    0.74736842,
+    0.70526316,
+    0.66315789,
+    0.62105263,
+    0.57894737,
+    0.53684211,
+    0.49473684,
+    0.45263158,
+    0.41052632,
+    0.36842105,
+    0.32631579,
+    0.28421053,
+    0.24210526,
+    0.2,
 ]
-THRESHOLD: int = 3000
-
-
-def load_templates() -> list[MatLike]:
-    """
-    Return the list of templates.
-
-    :return: list of templates
-    """
-    return [
-        cv2.imread(os.path.join(ASSETS_DIRECTORY, "template1.png")),
-        cv2.imread(os.path.join(ASSETS_DIRECTORY, "template2.png")),
-        cv2.imread(os.path.join(ASSETS_DIRECTORY, "template3.png")),
-    ]
+SCREENSHOT: str = "screenshot.png"
+TEMPLATES: list[MatLike] = [
+    imread(os.path.join(ASSETS_DIRECTORY, "template1.png")),
+    imread(os.path.join(ASSETS_DIRECTORY, "template2.png")),
+    imread(os.path.join(ASSETS_DIRECTORY, "template3.png")),
+]
+THRESHOLD: float = 0.65
 
 
 def init_templates() -> list[MatLike]:
     """
-    Return the list of edges for each template.
+    Return the list of edged templates.
 
-    :return: list of templates' edges
+    :return: List of edged templates
     """
-    return [cv2.Canny(cv2.cvtColor(template, cv2.COLOR_BGR2GRAY), 50, 200) for template in load_templates().copy()]
+    return [Canny(cvtColor(template, COLOR_BGR2GRAY), EDGE_MIN_VALUE, EDGE_MAX_VALUE) for template in TEMPLATES]
 
 
-def click_on_target(match_location: Sequence[int], template_shape: tuple[int, ...]) -> None:
+def resize_screenshot(screenshot: MatLike, scale: float) -> MatLike:
+    """
+    Resize the input screenshot.
+
+    :param screenshot: Screenshot to resize
+    :param scale: Factor to resize the screenshot
+    :return: resized screenshot.
+    """
+    new_width: int = int(screenshot.shape[1] * scale)
+    new_height: int = int(screenshot.shape[0] * scale)
+    return cast(MatLike, resize(screenshot, (new_width, new_height)))
+
+
+def get_potential_match(screenshot: MatLike, template: MatLike) -> tuple[float, Sequence[int]]:
+    """
+    Get the potential match value and its location.
+
+    :param screenshot: Source for template matching
+    :param template: template to match
+    :return: potential match value and location.
+    """
+    matches: MatLike = matchTemplate(screenshot, template, TM_CCOEFF_NORMED)
+    potential_match: tuple[float, float, Sequence[int], Sequence[int]] = minMaxLoc(matches)
+    max_value: float = potential_match[1]
+    max_location: Sequence[int] = potential_match[3]
+    return max_value, max_location
+
+
+def if_monitors_left_top_present(monitors_size: dict[str, int]) -> tuple[int, int]:
+    """
+    Handle Optional of monitors_left_top (if_present like).
+
+    :param monitors_size: Dictionary containing left and top properties of the system's monitor(s)
+    :return: if present, the left-top pixel's coordinates of the system's monitor(s).
+    """
+    monitors_left: int | None = monitors_size.get("left")
+    monitors_top: int | None = monitors_size.get("top")
+    if monitors_left is None:
+        raise ValueError("monitors_size 'left' value is None")
+    if monitors_top is None:
+        raise ValueError("monitors_size 'top' value is None")
+    return monitors_left, monitors_top
+
+
+def is_match_found(match_value: float) -> bool:
+    """
+    Check if a match is found.
+
+    :param match_value: Value of the match to check
+    :return: Whether the match is found or not.
+    """
+    return match_value > THRESHOLD
+
+
+def multiscale_match_template(
+    templates: list[MatLike], screenshot: MatLike, left_top_coordinates: tuple[int, int]
+) -> None:
+    """
+    Apply multiscale template matching algorithm.
+
+    :param templates: List of edged templates to match
+    :param screenshot: screenshot where the search is running
+    :param left_top_coordinates: left-top pixel of the system monitor(s)
+    :return:
+    """
+    for scale in SCALES:
+        resized_screenshot: MatLike = resize_screenshot(screenshot, scale)
+        edged_screenshot: MatLike = Canny(resized_screenshot, 50, 200)
+        for template in templates:
+            potential_match: tuple[float, Sequence[int]] = get_potential_match(edged_screenshot, template)
+            potential_match_value: float = potential_match[0]
+            potential_match_location: Sequence[int] = potential_match[1]
+            if is_match_found(potential_match_value):
+                print("Match found!")
+                match_location_x: int = potential_match_location[0]
+                match_location_y: int = potential_match_location[1]
+                match_left_top_location: tuple[int, int] = (
+                    match_location_x + left_top_coordinates[0],
+                    match_location_y + left_top_coordinates[1],
+                )
+                template_height: int = template.shape[0]
+                template_width: int = template.shape[1]
+                target: tuple[float, float] = (
+                    match_left_top_location[0] + template_width / 2,
+                    match_left_top_location[1] + template_height / 2,
+                )
+                click_on_target(target)
+                sleep(6)
+                return
+
+
+def click_on_target(target_location: tuple[float, float]) -> None:
     """
     Click on the target that has been identified and move the cursor to its previous location.
 
-    :param Sequence[int] match_location: the coordinates of the pixels located at the top left of the matched image.
-    :param tuple[int, ...] template_shape: the shape of the corresponding template
+    :param target_location: Target coordinates
     """
-    top_left_x: int
-    top_left_y: int
-    top_left_x, top_left_y = match_location
-    original_position = pyautogui.position()
-    target = (top_left_x + template_shape[1] / 2, top_left_y + template_shape[0] / 2)
-    pyautogui.leftClick(target)
-    pyautogui.moveTo(original_position)
-
-
-def search_template(mss_instance: MSSBase, threshold: float) -> None:
-    """
-    Search and identify an image matching any templates with the specified threshold.
-
-    :param MSSBase mss_instance: an instance of MSSBase
-    :param float threshold: the threshold required to identify a match.
-    """
-    template: MatLike
-    for template in load_templates():
-        monitors_size: dict[str, int] = mss_instance.monitors[0]
-        monitors_left_top: Sequence[Optional[int]] = (monitors_size.get('left'), monitors_size.get('top'))
-        template_gray: MatLike = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-        screenshot: str = next(mss_instance.save(mon=-1, output=SCREENSHOT))
-        screenshot_gray: MatLike = cv2.cvtColor(cv2.imread(screenshot), cv2.COLOR_BGR2GRAY)
-        match_template: MatLike = cv2.matchTemplate(screenshot_gray, template_gray, cv2.TM_SQDIFF)
-        min_value: float
-        min_loc: Sequence[int]
-        min_value, _, min_loc, _ = cv2.minMaxLoc(match_template)
-        if monitors_left_top[0] is not None and monitors_left_top[1] is not None:
-            min_loc = (min_loc[0] + monitors_left_top[0], min_loc[1] + monitors_left_top[1])
-        if min_value < threshold:
-            print("Matching template!")
-            click_on_target(min_loc, template_gray.shape)
-            time.sleep(6)
-            break
+    original_position: Point | tuple[int, int] = position()
+    leftClick(target_location)
+    moveTo(original_position)
 
 
 def main() -> None:
     """
     NexusDownloadFlow main function.
 
-    :raise SystemExit: raised when the window is closed
+    :raises SystemExit: raised when closing program
+    :raises KeyboardInterrupt: raised when the user interrupts the program
     """
     print_ascii_art()
     print("NexusDownloadFlow is starting...")
-    print(
-        "Do not forget to replace the assets templates (1, 2 & 3) in order to match with the screenshots "
-        "taken from your monitor!"
-    )
+    edged_templates: list[MatLike] = init_templates()
     try:
         with mss() as mss_instance:
+            print("NexusDownloadFlow is running")
             while True:
-                search_template(mss_instance, THRESHOLD)
-    except SystemExit:
+                monitors_size: dict[str, int] = mss_instance.monitors[0]
+                monitors_left_top: tuple[int, int] = if_monitors_left_top_present(monitors_size)
+                screenshot: MatLike = imread(next(mss_instance.save(mon=-1, output=SCREENSHOT)))
+                grayscale_screenshot: MatLike = cvtColor(screenshot, COLOR_BGR2GRAY)
+                multiscale_match_template(edged_templates, grayscale_screenshot, monitors_left_top)
+    except (SystemExit, KeyboardInterrupt):
         print("Exiting the program...")
-        raise
+        sys.exit(0)
     # except FailSafeException:
     #     # log error
     #     raise
