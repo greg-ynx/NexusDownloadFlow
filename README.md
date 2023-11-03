@@ -15,17 +15,6 @@ Execute `NexusDownloadFlow.exe` while the mod list is downloading.
 
 ## Auto-clicker is not clicking
 
-Do not worry, you have to replace the template files where you installed NDF with the one you will screenshot:
-`NexusDownloadFlow/assets/template{x}.png`
-
-+ `template1.png` is the raw `Slow download` button
-+ `template2.png` is the `Slow download` button with mouse over
-+ `template3.png` is the `Click here` link appearing five seconds after clicking on `Slow download` button
-
-If your issue persists, maximize the Nexus Mods page.
-
-## Your issue still persist?
-
 Open an issue [here](https://github.com/greg-ynx/NexusDownloadFlow/issues/new), and if possible, give the scenario in which you had this issue, which version of NDF you are using
 and provide a screenshot of your logs or the contents of your current `nexus-download-flow-logs.log` file.
 
