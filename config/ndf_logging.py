@@ -32,7 +32,13 @@ def _stop_logging() -> None:
     logging.shutdown()
 
 
-HANDLERS: Iterable[Handler] = [logging.FileHandler(_setup_logfile_path()), logging.StreamHandler(sys.stdout)]
+def _logs_directory_exists() -> bool:
+    """
+    Check if the logs directory exists.
+
+    :return: Whether the logs directory exists.
+    """
+    return os.path.exists(LOGS_DIRECTORY)
 
 
 def get_logfile_path() -> str:
@@ -50,9 +56,12 @@ def setup_logging() -> None:
 
     :return: None.
     """
+    if not _logs_directory_exists():
+        os.makedirs(LOGS_DIRECTORY)
+    _HANDLERS: Iterable[Handler] = [logging.FileHandler(_setup_logfile_path()), logging.StreamHandler(sys.stdout)]
     logging.basicConfig(
         level=logging.INFO,
-        handlers=HANDLERS,
+        handlers=_HANDLERS,
         format="%(asctime)s | %(levelname)s | %(message)s",
         datefmt="%d/%m/%Y - %H:%M:%S",
     )

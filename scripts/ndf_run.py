@@ -12,6 +12,7 @@ from pyautogui import FailSafeException, Point, leftClick, moveTo, position
 
 from config.definitions import ASSETS_DIRECTORY
 from config.ndf_logging import delete_logfile, get_logfile_path, logging_report
+from scripts.ndf_params import ask_to_keep_logfile
 
 EDGE_MIN_VALUE: int = 50
 EDGE_MAX_VALUE: int = 200
@@ -179,7 +180,7 @@ def run() -> None:
             multiscale_match_template(edged_templates, grayscale_screenshot, monitors_left_top)
 
 
-def try_run(keep_logfile: bool = False) -> None:
+def try_run() -> None:
     """
     Try to run the auto-downloader.
 
@@ -190,7 +191,9 @@ def try_run(keep_logfile: bool = False) -> None:
     :raises Exception: For currently unknown exceptions (open an issue on GitHub if it happens).
     :return: None.
     """
+    keep_logfile: bool = False
     try:
+        keep_logfile = ask_to_keep_logfile()
         run()
     except KeyboardInterrupt:
         logging.info("Exiting the program...")
