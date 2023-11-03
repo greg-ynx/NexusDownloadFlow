@@ -4,9 +4,12 @@ import logging
 
 def ask_to_keep_logfile() -> bool:
     """
-    Ask if the user wants to keep the logfile.
+    Ask if the user wants to keep the log file.
 
-    :return: Whether to keep logfile.
+    :return: Bool value representing whether to keep the log file or not.
+    True, if user's answer is "y" or "Y".
+    False, if user's answer is "n" or "N".
+    Will repeat if the input value is not valid.
     """
     while True:
         keep: str = str(input("Would you like to save the logfile? (y/n)\n"))

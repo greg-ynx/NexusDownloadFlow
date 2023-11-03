@@ -7,11 +7,7 @@ from scripts.ndf_run import try_run
 
 
 def main() -> None:
-    """
-    NexusDownloadFlow main function.
-
-    :return: None.
-    """
+    """NexusDownloadFlow main function."""
     setup_logging()
     print_ascii_art()
     logging.info("NexusDownloadFlow is starting...")

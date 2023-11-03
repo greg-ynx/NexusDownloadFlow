@@ -14,66 +14,31 @@ _NDF_STR: str = "ndf"
 _LOGFILE_NAME: str = time.strftime("%Y_%m_%d_") + _NDF_STR + _LOG_EXTENSION
 
 
+def _logs_directory_exists() -> bool:
+    """
+    Check if the logs directory exists.
+
+    :return: Bool value indicating if the logs directory exists.
+    """
+    return os.path.exists(LOGS_DIRECTORY)
+
+
 def _setup_logfile_path() -> str:
     """
-    Set up logfile.
+    Set up log file.
 
-    :return: Logfile path.
+    :return: String representing the log file path.
     """
     return os.path.join(LOGS_DIRECTORY, _LOGFILE_NAME)
 
 
 def _stop_logging() -> None:
-    """
-    Shut down the logger listener.
-
-    :return: None.
-    """
+    """Shut down the logger."""
     logging.shutdown()
 
 
-def _logs_directory_exists() -> bool:
-    """
-    Check if the logs directory exists.
-
-    :return: Whether the logs directory exists.
-    """
-    return os.path.exists(LOGS_DIRECTORY)
-
-
-def get_logfile_path() -> str:
-    """
-    Getter for the current logfile path.
-
-    :return: Logfile path.
-    """
-    return _setup_logfile_path()
-
-
-def setup_logging() -> None:
-    """
-    Set up logging configuration.
-
-    :return: None.
-    """
-    if not _logs_directory_exists():
-        os.makedirs(LOGS_DIRECTORY)
-    _HANDLERS: Iterable[Handler] = [logging.FileHandler(_setup_logfile_path()), logging.StreamHandler(sys.stdout)]
-    logging.basicConfig(
-        level=logging.INFO,
-        handlers=_HANDLERS,
-        format="%(asctime)s | %(levelname)s | %(message)s",
-        datefmt="%d/%m/%Y - %H:%M:%S",
-    )
-    logging.debug("Logger setup complete.")
-
-
 def delete_logfile() -> None:
-    """
-    Delete the logfile.
-
-    :return: None.
-    """
+    """Delete the log file."""
     logging.debug("Try to delete the current logfile...")
     logfile_path: str = get_logfile_path()
     _stop_logging()
@@ -82,13 +47,32 @@ def delete_logfile() -> None:
         logging.debug("Logfile deleted.")
 
 
-def logging_report() -> None:
+def get_logfile_path() -> str:
     """
-    Log report to open an issue on the project's repository.
+    Getter for the current log file path.
 
-    :return: None.
+    :return: Log file path.
     """
+    return _setup_logfile_path()
+
+
+def logging_report() -> None:
+    """Log report to open an issue on the project's repository."""
     logging.critical(
         "Please report this exception to our repository on GitHub: "
         "https://github.com/greg-ynx/NexusDownloadFlow/issues?q=is%3Aissue+is%3Aopen"
     )
+
+
+def setup_logging() -> None:
+    """Set up logging configuration."""
+    if not _logs_directory_exists():
+        os.makedirs(LOGS_DIRECTORY)
+    _handlers: Iterable[Handler] = [logging.FileHandler(_setup_logfile_path()), logging.StreamHandler(sys.stdout)]
+    logging.basicConfig(
+        level=logging.INFO,
+        handlers=_handlers,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+        datefmt="%d/%m/%Y - %H:%M:%S",
+    )
+    logging.debug("Logger setup complete.")

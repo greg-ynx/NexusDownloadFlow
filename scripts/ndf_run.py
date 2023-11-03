@@ -47,6 +47,52 @@ TEMPLATES: list[MatLike] = [
 THRESHOLD: float = 0.65
 
 
+def click_on_target(target_location: tuple[float, float]) -> None:
+    """
+    Click on the target that has been identified and move the cursor to its previous location.
+
+    :param target_location: Tuple of target coordinates.
+    """
+    original_position: Point | tuple[int, int] = position()
+    leftClick(target_location)
+    moveTo(original_position)
+
+
+def get_potential_match(screenshot: MatLike, template: MatLike) -> tuple[float, Sequence[int]]:
+    """
+    Get the potential match value and its location.
+
+    :param screenshot: Source for template matching.
+    :param template: Template to match.
+    :return: Tuple of potential match value and location.
+    """
+    matches: MatLike = matchTemplate(screenshot, template, TM_CCOEFF_NORMED)
+    potential_match: tuple[float, float, Sequence[int], Sequence[int]] = minMaxLoc(matches)
+    max_value: float = potential_match[1]
+    max_location: Sequence[int] = potential_match[3]
+    return max_value, max_location
+
+
+def if_monitors_left_top_present(monitors_size: dict[str, int]) -> tuple[int, int]:
+    """
+    Handle Optional of monitors_left_top (if_present like).
+
+    :param monitors_size: Dictionary containing left and top properties of the system's monitor(s).
+    :return: If present, tuple representing the left-top pixel's coordinates of the system's monitor(s).
+    """
+
+    def error_message(_key: str) -> str:
+        return f"Monitors' size '{_key}' value is None."
+
+    monitors_left: int | None = monitors_size.get("left")
+    monitors_top: int | None = monitors_size.get("top")
+    if monitors_left is None:
+        raise ValueError(error_message("left"))
+    if monitors_top is None:
+        raise ValueError(error_message("top"))
+    return monitors_left, monitors_top
+
+
 def init_templates() -> list[MatLike]:
     """
     Return the list of edged templates.
@@ -54,6 +100,16 @@ def init_templates() -> list[MatLike]:
     :return: List of edged templates.
     """
     return [Canny(cvtColor(template, COLOR_BGR2GRAY), EDGE_MIN_VALUE, EDGE_MAX_VALUE) for template in TEMPLATES]
+
+
+def is_match_found(match_value: float) -> bool:
+    """
+    Check if a match is found.
+
+    :param match_value: Value of the match to check.
+    :return: Bool value indicating whether a match is found or not.
+    """
+    return match_value > THRESHOLD
 
 
 def resize_screenshot(screenshot: MatLike, scale: float) -> MatLike:
@@ -69,63 +125,6 @@ def resize_screenshot(screenshot: MatLike, scale: float) -> MatLike:
     return cast(MatLike, resize(screenshot, (new_width, new_height)))
 
 
-def get_potential_match(screenshot: MatLike, template: MatLike) -> tuple[float, Sequence[int]]:
-    """
-    Get the potential match value and its location.
-
-    :param screenshot: Source for template matching.
-    :param template: Template to match.
-    :return: Potential match value and location.
-    """
-    matches: MatLike = matchTemplate(screenshot, template, TM_CCOEFF_NORMED)
-    potential_match: tuple[float, float, Sequence[int], Sequence[int]] = minMaxLoc(matches)
-    max_value: float = potential_match[1]
-    max_location: Sequence[int] = potential_match[3]
-    return max_value, max_location
-
-
-def if_monitors_left_top_present(monitors_size: dict[str, int]) -> tuple[int, int]:
-    """
-    Handle Optional of monitors_left_top (if_present like).
-
-    :param monitors_size: Dictionary containing left and top properties of the system's monitor(s).
-    :return: If present, the left-top pixel's coordinates of the system's monitor(s).
-    """
-
-    def error_message(_key: str) -> str:
-        return f"Monitors' size '{_key}' value is None."
-
-    monitors_left: int | None = monitors_size.get("left")
-    monitors_top: int | None = monitors_size.get("top")
-    if monitors_left is None:
-        raise ValueError(error_message("left"))
-    if monitors_top is None:
-        raise ValueError(error_message("top"))
-    return monitors_left, monitors_top
-
-
-def is_match_found(match_value: float) -> bool:
-    """
-    Check if a match is found.
-
-    :param match_value: Value of the match to check.
-    :return: Whether the match is found or not.
-    """
-    return match_value > THRESHOLD
-
-
-def click_on_target(target_location: tuple[float, float]) -> None:
-    """
-    Click on the target that has been identified and move the cursor to its previous location.
-
-    :param target_location: Tuple of target coordinates.
-    :return: None.
-    """
-    original_position: Point | tuple[int, int] = position()
-    leftClick(target_location)
-    moveTo(original_position)
-
-
 def multiscale_match_template(
     templates: list[MatLike], screenshot: MatLike, left_top_coordinates: tuple[int, int]
 ) -> None:
@@ -135,7 +134,6 @@ def multiscale_match_template(
     :param templates: List of edged templates to match.
     :param screenshot: Screenshot where the search is running.
     :param left_top_coordinates: Left-top pixel of the system monitor(s).
-    :return: None.
     """
     for scale in SCALES:
         resized_screenshot: MatLike = resize_screenshot(screenshot, scale)
@@ -164,11 +162,7 @@ def multiscale_match_template(
 
 
 def run() -> None:
-    """
-    Run the auto-downloader.
-
-    :return: None.
-    """
+    """Run the auto-downloader."""
     logging.info("NexusDownloadFlow is running.")
     edged_templates: list[MatLike] = init_templates()
     with mss() as mss_instance:
@@ -184,12 +178,9 @@ def try_run() -> None:
     """
     Try to run the auto-downloader.
 
-    :param keep_logfile: If the logfile should be kept on program exit.
-    :raises SystemExit: Raised when closing the program.
     :raises KeyboardInterrupt: Raised when the user interrupts the program.
     :raises ValueError: Should not be raised (open an issue on GitHub if it happens).
     :raises Exception: For currently unknown exceptions (open an issue on GitHub if it happens).
-    :return: None.
     """
     keep_logfile: bool = False
     try:
