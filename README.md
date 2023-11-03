@@ -1,28 +1,24 @@
-# NexusDownloadFlow 2022 : Auto clicker script using computer vision
+# NexusDownloadFlow: Auto-downloader for Nexus Mods
 
-NexusDownloaderFlow (NDF) 2022 is a script that take screenshots and classify if any template match with the current
-screenshot taken. It was made in order to automate process with `Wabbajack modlist installation of Nexus' mods` in which
-you have to manually click on `Slow download` button is your NexusMods account is not premium.
+NexusDownloadFlow (NDF) is a program that automates the download process with `Wabbajack modlist installation of Nexus
+Mods` in which you have to manually click on `Slow download` button if your Nexus Mods account is not premium.
 
-## How to use NDF 2022 ?
+## How to use NexusDownloadFlow?
 
-Just execute `NexusDownloadFlow 2022.exe` and open your NexusMods' download page.
+### Without Wabbajack
 
-## Auto clicker is not clicking
+Execute `NexusDownloadFlow.exe` and open your Nexus Mods download page.
 
-Do not worry, you have to replace the templates files where you installed NDF with the one you will screenshot:
-`NexusDownloadFlow 2022/assets/template{x}.png`
+### With Wabbajack
 
-+ `template1.png` is the raw `Slow download` button
-+ `template2.png` is the `Slow download` button with mouse over
-+ `template3.png` is the `Click here` link appearing five seconds after clicking on `Slow download` button
+Execute `NexusDownloadFlow.exe` while the mod list is downloading.
+
+## Auto-clicker is not clicking
+
+Open an issue [here](https://github.com/greg-ynx/NexusDownloadFlow/issues/new), and if possible, give the scenario in which you had this issue, which version of NDF you are using
+and provide a screenshot of your logs or the contents of your current `{date}_ndf.log` file.
 
 ## Credits
 
-Thanks to @parsiad for inspiring me with his repository named `parsiad/nexus-autodl` 
-(I could not download his auto clicker).
-
-Requirements used for this script are :
-+ PyAutoGUI~=0.9.53
-+ opencv-python==4.5.5.64
-+ mss~=6.1.0
+Thanks to [parsiad](https://github.com/parsiad) for inspiring me with his repository named 
+[`parsiad/nexus-autodl`](https://github.com/parsiad/nexus-autodl).

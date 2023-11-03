@@ -1,0 +1,50 @@
+[project]
+name = "NexusDownloadFlow"
+version = "2.0.0"
+authors = [
+    {name = "Gregory Ployart", email = "greg.ynx@gmail.com", alias = "greg-ynx"},
+]
+description = "Auto-downloader program to automate Nexus modlist downloads for free."
+readme = "README.md"
+requires-python = ">=3.11"
+release-date = 2023-10-01
+
+[python]
+version = "3.11.5"
+
+[github]
+owner = "greg-ynx"
+repository = "https://github.com/greg-ynx/NexusDownloadFlow"
+issues = "https://github.com/greg-ynx/NexusDownloadFlow/issues"
+
+[tool.mypy]
+python_version = "3.11"
+disallow_untyped_defs = true
+disallow_any_unimported = true
+no_implicit_optional = true
+check_untyped_defs = true
+warn_return_any = true
+show_error_codes = true
+warn_unused_ignores = true
+
+[tool.ruff]
+extend-select = [
+    "W",
+    "I",
+    "N",
+    "D",
+    "S",
+    "T20",
+    "C4",
+    "SIM",
+    "TCH"
+]
+ignore = [
+    "D203",
+    "D212"
+]
+fix = true
+show-fixes = true
+show-source = false
+line-length = 120
+target-version = "py311"
