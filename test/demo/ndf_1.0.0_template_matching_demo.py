@@ -7,6 +7,7 @@ The algorithm used is the grayscale template matching and the TM_SQDIFF comparis
 import os
 import sys
 import time
+from typing import Any
 
 import cv2
 import pyautogui
@@ -42,21 +43,21 @@ def _test_algorithm() -> None:
     try:
         with mss() as mss_instance:
             while True:
-                monitors_size = mss_instance.monitors[0]
-                monitors_left_top = (monitors_size.get("left"), monitors_size.get("top"))
-                screenshot = cv2.imread(next(mss_instance.save(mon=-1, output=SCREENSHOT)))
+                monitors_size: dict[str, int] = mss_instance.monitors[0]
+                monitors_left_top: tuple[Any, Any] = (monitors_size.get("left"), monitors_size.get("top"))
+                screenshot: MatLike = cv2.imread(next(mss_instance.save(mon=-1, output=SCREENSHOT)))
                 screenshot = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
                 for template in _init_templates():
-                    match_template = cv2.matchTemplate(screenshot, template, cv2.TM_SQDIFF)
+                    match_template: MatLike = cv2.matchTemplate(screenshot, template, cv2.TM_SQDIFF)
                     min_value, _, min_location, _ = cv2.minMaxLoc(match_template)
                     if min_value < THRESHOLD:
                         _logging_test("Match found!")
-                        match_left_top_location = (
+                        match_left_top_location: tuple[int, int] = (
                             min_location[0] + monitors_left_top[0],
                             min_location[1] + monitors_left_top[1],
                         )
                         template_height, template_width = template.shape
-                        target = (
+                        target: tuple[float, float] = (
                             match_left_top_location[0] + template_width / 2,
                             match_left_top_location[1] + template_height / 2,
                         )
