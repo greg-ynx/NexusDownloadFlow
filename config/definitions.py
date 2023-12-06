@@ -29,4 +29,4 @@ with open(PYPROJECT_DIRECTORY, "rb") as pyproject:
     PYPROJECT_DATA: dict[str, Any] = tomllib.load(pyproject)
     PROJECT_DATA: dict[str, Any] = PYPROJECT_DATA.get("project")
     GITHUB_DATA: dict[str, str] = PYPROJECT_DATA.get("github")
-    GITHUB_ISSUE_VALUE: str = GITHUB_DATA.get("issue")
+    GITHUB_ISSUE_VALUE: str = GITHUB_DATA.get("issues")

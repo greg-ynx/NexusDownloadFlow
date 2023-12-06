@@ -8,7 +8,7 @@ from typing import Sequence, cast
 from cv2 import COLOR_BGR2GRAY, TM_CCOEFF_NORMED, Canny, cvtColor, imread, matchTemplate, minMaxLoc, resize
 from cv2.typing import MatLike
 from mss import mss
-from pyautogui import FailSafeException, Point, leftClick, moveTo, position
+from pyautogui import FAILSAFE_POINTS, FailSafeException, Point, leftClick, moveTo, position
 
 from config.definitions import ASSETS_DIRECTORY
 from config.ndf_logging import delete_logfile, get_logfile_path, logging_report
@@ -54,8 +54,12 @@ def click_on_target(target_location: tuple[float, float]) -> None:
     :param target_location: Tuple of target coordinates.
     """
     original_position: Point | tuple[int, int] = position()
-    leftClick(target_location)
-    moveTo(original_position)
+    if original_position not in FAILSAFE_POINTS:
+        leftClick(target_location)
+        moveTo(original_position)
+    else:
+        logging.warning(f"Risk of fail-safe trigger: Mouse position is on a fail-safe point -> { original_position }")
+        logging.info("NexusDownloadFlow did not click on the target.")
 
 
 def get_potential_match(screenshot: MatLike, template: MatLike) -> tuple[float, Sequence[int]]:
@@ -181,6 +185,7 @@ def try_run() -> None:
 
     :raises KeyboardInterrupt: Raised when the user interrupts the program.
     :raises FailSafeException: Raised when the mouse position is on one of the corners of the screen.
+    Should not be raised (open an issue on GitHub if it happens).
     :raises ValueError: Should not be raised (open an issue on GitHub if it happens).
     :raises Exception: For currently unknown exceptions (open an issue on GitHub if it happens).
     """
