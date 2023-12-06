@@ -1,8 +1,6 @@
 """Parameters file."""
 import logging
 
-__KEEP: str = str(input("Would you like to save the logfile? (y/n)\n"))
-
 
 def ask_to_keep_logfile() -> bool:
     """
@@ -14,7 +12,8 @@ def ask_to_keep_logfile() -> bool:
     Will repeat if the input value is not valid.
     """
     while True:
-        match __KEEP:
+        __keep: str = str(input("Would you like to save the logfile? (y/n)\n"))
+        match __keep:
             case "y" | "Y":
                 logging.info("Logfile will be saved.")
                 return True
@@ -22,4 +21,4 @@ def ask_to_keep_logfile() -> bool:
                 logging.info("Logfile will be saved only if an exception/error occurred.")
                 return False
             case _:
-                continue
+                print("Please enter a valid value.")

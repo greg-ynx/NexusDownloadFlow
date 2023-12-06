@@ -209,3 +209,4 @@ def try_run() -> None:
             logging.info(f"Find logfile at: { get_logfile_path() }")
         else:
             delete_logfile()
+        input("Press any key to exit...")

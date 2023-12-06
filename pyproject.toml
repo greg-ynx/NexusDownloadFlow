@@ -34,7 +34,7 @@ extend-select = [
     "N",
     "D",
     "S",
-    "T20",
+    #"T20", # use it when you are developping in order to not forget to delete unwanted print calls
     "C4",
     "SIM",
     "TCH"
