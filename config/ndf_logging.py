@@ -7,8 +7,9 @@ import time
 from logging import Handler
 from typing import Iterable
 
-from config.definitions import LOGS_DIRECTORY
+from config.definitions import GITHUB_ISSUE_VALUE, LOGS_DIRECTORY
 
+__GITHUB_ISSUE_URL: str = GITHUB_ISSUE_VALUE + "?q=is%3Aissue+is%3Aopen"
 __LOG_EXTENSION: str = ".log"
 __NDF_STR: str = "ndf"
 __LOGFILE_NAME: str = time.strftime("%Y_%m_%d_") + __NDF_STR + __LOG_EXTENSION
@@ -58,10 +59,7 @@ def get_logfile_path() -> str:
 
 def logging_report() -> None:
     """Log report to open an issue on the project's repository."""
-    logging.critical(
-        "Please report this exception to our repository on GitHub: "
-        "https://github.com/greg-ynx/NexusDownloadFlow/issues?q=is%3Aissue+is%3Aopen"
-    )
+    logging.critical("Please report this exception to our repository on GitHub: " + __GITHUB_ISSUE_URL)
 
 
 def setup_logging() -> None:

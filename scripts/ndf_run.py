@@ -78,6 +78,7 @@ def if_monitors_left_top_present(monitors_size: dict[str, int]) -> tuple[int, in
     Handle Optional of monitors_left_top (if_present like).
 
     :param monitors_size: Dictionary containing left and top properties of the system's monitor(s).
+    :raises ValueError: If any of the value is none.
     :return: If present, tuple representing the left-top pixel's coordinates of the system's monitor(s).
     """
 
@@ -179,6 +180,7 @@ def try_run() -> None:
     Try to run the auto-downloader.
 
     :raises KeyboardInterrupt: Raised when the user interrupts the program.
+    :raises FailSafeException: Raised when the mouse position is on one of the corners of the screen.
     :raises ValueError: Should not be raised (open an issue on GitHub if it happens).
     :raises Exception: For currently unknown exceptions (open an issue on GitHub if it happens).
     """
