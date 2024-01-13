@@ -8,9 +8,9 @@ from typing import Sequence, cast
 from cv2 import COLOR_BGR2GRAY, TM_CCOEFF_NORMED, Canny, cvtColor, imread, matchTemplate, minMaxLoc, resize
 from cv2.typing import MatLike
 from mss import mss
-from pyautogui import FailSafeException, Point, leftClick, moveTo, position
+from pyautogui import FAILSAFE_POINTS, FailSafeException, Point, leftClick, moveTo, position
 
-from config.definitions import ASSETS_DIRECTORY
+from config.definitions import ASSETS_DIRECTORY, SCREENSHOT_PATH
 from config.ndf_logging import delete_logfile, get_logfile_path, logging_report
 from scripts.ndf_params import ask_to_keep_logfile
 
@@ -38,7 +38,6 @@ SCALES: list[float] = [
     0.24210526,
     0.2,
 ]
-SCREENSHOT: str = "screenshot.png"
 TEMPLATES: list[MatLike] = [
     imread(os.path.join(ASSETS_DIRECTORY, "template1.png")),
     imread(os.path.join(ASSETS_DIRECTORY, "template2.png")),
@@ -54,8 +53,12 @@ def click_on_target(target_location: tuple[float, float]) -> None:
     :param target_location: Tuple of target coordinates.
     """
     original_position: Point | tuple[int, int] = position()
-    leftClick(target_location)
-    moveTo(original_position)
+    if original_position not in FAILSAFE_POINTS:
+        leftClick(target_location)
+        moveTo(original_position)
+    else:
+        logging.warning(f"Risk of fail-safe trigger: Mouse position is on a fail-safe point -> { original_position }")
+        logging.info("NexusDownloadFlow did not click on the target.")
 
 
 def get_potential_match(screenshot: MatLike, template: MatLike) -> tuple[float, Sequence[int]]:
@@ -78,6 +81,7 @@ def if_monitors_left_top_present(monitors_size: dict[str, int]) -> tuple[int, in
     Handle Optional of monitors_left_top (if_present like).
 
     :param monitors_size: Dictionary containing left and top properties of the system's monitor(s).
+    :raises ValueError: If any of the value is none.
     :return: If present, tuple representing the left-top pixel's coordinates of the system's monitor(s).
     """
 
@@ -169,7 +173,7 @@ def run() -> None:
         while True:
             monitors_size: dict[str, int] = mss_instance.monitors[0]
             monitors_left_top: tuple[int, int] = if_monitors_left_top_present(monitors_size)
-            screenshot: MatLike = imread(next(mss_instance.save(mon=-1, output=SCREENSHOT)))
+            screenshot: MatLike = imread(next(mss_instance.save(mon=-1, output=SCREENSHOT_PATH)))
             grayscale_screenshot: MatLike = cvtColor(screenshot, COLOR_BGR2GRAY)
             multiscale_match_template(edged_templates, grayscale_screenshot, monitors_left_top)
 
@@ -179,6 +183,8 @@ def try_run() -> None:
     Try to run the auto-downloader.
 
     :raises KeyboardInterrupt: Raised when the user interrupts the program.
+    :raises FailSafeException: Raised when the mouse position is on one of the corners of the screen.
+    Should not be raised (open an issue on GitHub if it happens).
     :raises ValueError: Should not be raised (open an issue on GitHub if it happens).
     :raises Exception: For currently unknown exceptions (open an issue on GitHub if it happens).
     """
@@ -200,8 +206,8 @@ def try_run() -> None:
         logging_report()
         keep_logfile = True
     finally:
-        if os.path.exists(SCREENSHOT):
-            os.remove(SCREENSHOT)
+        if os.path.exists(SCREENSHOT_PATH):
+            os.remove(SCREENSHOT_PATH)
         else:
             logging.warning("The screenshot does not exist.")
         logging.info("Program ended.")
@@ -209,3 +215,4 @@ def try_run() -> None:
             logging.info(f"Find logfile at: { get_logfile_path() }")
         else:
             delete_logfile()
+        input("Press any key to exit...")

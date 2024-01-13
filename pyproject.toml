@@ -7,7 +7,7 @@ authors = [
 description = "Auto-downloader program to automate Nexus modlist downloads for free."
 readme = "README.md"
 requires-python = ">=3.11"
-release-date = 2023-10-01
+release-date = 2024-01-13
 
 [python]
 version = "3.11.5"
@@ -34,7 +34,7 @@ extend-select = [
     "N",
     "D",
     "S",
-    "T20",
+    #"T20", # use it when you are developping in order to not forget to delete unwanted print calls
     "C4",
     "SIM",
     "TCH"
