@@ -10,7 +10,7 @@ from cv2.typing import MatLike
 from mss import mss
 from pyautogui import FAILSAFE_POINTS, FailSafeException, Point, leftClick, moveTo, position
 
-from config.definitions import ASSETS_DIRECTORY
+from config.definitions import ASSETS_DIRECTORY, SCREENSHOT_PATH
 from config.ndf_logging import delete_logfile, get_logfile_path, logging_report
 from scripts.ndf_params import ask_to_keep_logfile
 
@@ -38,7 +38,6 @@ SCALES: list[float] = [
     0.24210526,
     0.2,
 ]
-SCREENSHOT: str = "screenshot.png"
 TEMPLATES: list[MatLike] = [
     imread(os.path.join(ASSETS_DIRECTORY, "template1.png")),
     imread(os.path.join(ASSETS_DIRECTORY, "template2.png")),
@@ -174,7 +173,7 @@ def run() -> None:
         while True:
             monitors_size: dict[str, int] = mss_instance.monitors[0]
             monitors_left_top: tuple[int, int] = if_monitors_left_top_present(monitors_size)
-            screenshot: MatLike = imread(next(mss_instance.save(mon=-1, output=SCREENSHOT)))
+            screenshot: MatLike = imread(next(mss_instance.save(mon=-1, output=SCREENSHOT_PATH)))
             grayscale_screenshot: MatLike = cvtColor(screenshot, COLOR_BGR2GRAY)
             multiscale_match_template(edged_templates, grayscale_screenshot, monitors_left_top)
 
@@ -207,8 +206,8 @@ def try_run() -> None:
         logging_report()
         keep_logfile = True
     finally:
-        if os.path.exists(SCREENSHOT):
-            os.remove(SCREENSHOT)
+        if os.path.exists(SCREENSHOT_PATH):
+            os.remove(SCREENSHOT_PATH)
         else:
             logging.warning("The screenshot does not exist.")
         logging.info("Program ended.")
