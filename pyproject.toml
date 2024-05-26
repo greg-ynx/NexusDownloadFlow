@@ -1,6 +1,6 @@
 [project]
 name = "NexusDownloadFlow"
-version = "2.1.0"
+version = "2.1.0-SNAPSHOT"
 authors = [
     {name = "Gregory Ployart", email = "greg.ynx@gmail.com", alias = "greg-ynx"},
 ]
