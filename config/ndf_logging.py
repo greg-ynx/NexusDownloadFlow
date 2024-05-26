@@ -15,29 +15,6 @@ __NDF_STR: str = "ndf"
 __LOGFILE_NAME: str = time.strftime("%Y_%m_%d_") + __NDF_STR + __LOG_EXTENSION
 
 
-def __logs_directory_exists() -> bool:
-    """
-    Check if the logs directory exists.
-
-    :return: Bool value indicating if the logs directory exists.
-    """
-    return os.path.exists(LOGS_DIRECTORY)
-
-
-def __setup_logfile_path() -> str:
-    """
-    Set up log file.
-
-    :return: String representing the log file path.
-    """
-    return os.path.join(LOGS_DIRECTORY, __LOGFILE_NAME)
-
-
-def __stop_logging() -> None:
-    """Shut down the logger."""
-    logging.shutdown()
-
-
 def delete_logfile() -> None:
     """Delete the log file."""
     logging.debug("Try to delete the current logfile...")
@@ -74,3 +51,26 @@ def setup_logging() -> None:
         datefmt="%d/%m/%Y - %H:%M:%S",
     )
     logging.debug("Logger setup completed.")
+
+
+def __logs_directory_exists() -> bool:
+    """
+    Check if the logs directory exists.
+
+    :return: Bool value indicating if the logs directory exists.
+    """
+    return os.path.exists(LOGS_DIRECTORY)
+
+
+def __setup_logfile_path() -> str:
+    """
+    Set up log file.
+
+    :return: String representing the log file path.
+    """
+    return os.path.join(LOGS_DIRECTORY, __LOGFILE_NAME)
+
+
+def __stop_logging() -> None:
+    """Shut down the logger."""
+    logging.shutdown()
