@@ -1,0 +1,13 @@
+# {issue_title}
+
+## Environment
+
+NexusDownloadFlow version: {ndf_version}
+Operating System (OS) and its architecture (32/64 bits): {user_operating_system} - {user_operating_system_architecture}
+System RAM capacity: {user_system_ram_capacity} GB
+Monitors: {user_monitors_count}
+Monitors resolution details: {user_monitors_resolutions}
+
+## Description
+
+{issue_description}

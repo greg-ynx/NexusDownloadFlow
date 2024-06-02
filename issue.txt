@@ -1,0 +1,13 @@
+# Final test
+
+## Abstract
+
+NexusDownloadFlow version: 2.1.0-SNAPSHOT
+Operating System (OS) and its architecture (32/64 bits): Windows 10 - 64bit
+System RAM capacity: 15.35 GB
+Monitors: 2
+Monitors resolution details: 2560x1440 - 2560x1440
+
+## Description
+
+J'ai eu un problème en essayant de remplacer les templates par des screenshots que j'ai moi même pris
