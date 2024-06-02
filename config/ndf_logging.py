@@ -19,7 +19,7 @@ def delete_logfile() -> None:
     """Delete the log file."""
     logging.debug("Try to delete the current logfile...")
     logfile_path: str = get_logfile_path()
-    __stop_logging()
+    stop_logging()
     if os.path.exists(logfile_path):
         os.remove(path=logfile_path)
         logging.debug("Logfile deleted.")
@@ -36,7 +36,10 @@ def get_logfile_path() -> str:
 
 def logging_report() -> None:
     """Log report to open an issue on the project's repository."""
-    logging.critical("Please report this exception to our repository on GitHub: " + __GITHUB_ISSUE_URL)
+    logging.critical(
+        f"Please report this exception to our repository on GitHub: {__GITHUB_ISSUE_URL}\n"
+        "You can use the issue command in order to fill our template."
+    )
 
 
 def setup_logging() -> None:
@@ -51,6 +54,11 @@ def setup_logging() -> None:
         datefmt="%d/%m/%Y - %H:%M:%S",
     )
     logging.debug("Logger setup completed.")
+
+
+def stop_logging() -> None:
+    """Shut down the logger."""
+    logging.shutdown()
 
 
 def __logs_directory_exists() -> bool:
@@ -69,8 +77,3 @@ def __setup_logfile_path() -> str:
     :return: String representing the log file path.
     """
     return os.path.join(LOGS_DIRECTORY, __LOGFILE_NAME)
-
-
-def __stop_logging() -> None:
-    """Shut down the logger."""
-    logging.shutdown()
