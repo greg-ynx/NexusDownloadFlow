@@ -9,6 +9,7 @@ from config.ndf_logging import logging_report, setup_logging, stop_logging
 
 # Messages
 __STARTING_MESSAGE: str = "Initiate deletion of log folder files..."
+__DELETING_ITEM_ERROR_MESSAGE: str = "Error deleting '{file_path}: {error}'"
 
 
 def cli_clear_logs() -> None:
@@ -24,8 +25,9 @@ def cli_clear_logs() -> None:
                 elif os.path.isdir(item_path):
                     shutil.rmtree(item_path)
             except Exception as e:
+                failed_count += 1
                 setup_logging()
-                logging.error(f"Error deleting {item_path}: {e}")
+                logging.error(__DELETING_ITEM_ERROR_MESSAGE.format(file_path=item_path, error=e))
                 logging_report()
         if failed_count == 0:
             print("The contents of the logs folder have been successfully deleted.")

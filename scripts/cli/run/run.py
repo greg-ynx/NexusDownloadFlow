@@ -10,9 +10,9 @@ from cv2.typing import MatLike
 from mss import mss
 from pyautogui import FAILSAFE_POINTS, FailSafeException, Point, leftClick, moveTo, position
 
-from config.definitions import ASSETS_DIRECTORY, SCREENSHOT_PATH
+from config.definitions import SCREENSHOT_PATH, TEMPLATE_MATCHING_DIRECTORY_PATH
 from config.ndf_logging import delete_logfile, get_logfile_path, logging_report
-from scripts.ndf_params import ask_to_keep_logfile
+from scripts.params import ask_to_keep_logfile
 
 EDGE_MIN_VALUE: int = 50
 EDGE_MAX_VALUE: int = 200
@@ -39,9 +39,9 @@ SCALES: list[float] = [
     0.2,
 ]
 TEMPLATES: list[MatLike] = [
-    imread(os.path.join(ASSETS_DIRECTORY, "template1.png")),
-    imread(os.path.join(ASSETS_DIRECTORY, "template2.png")),
-    imread(os.path.join(ASSETS_DIRECTORY, "template3.png")),
+    imread(os.path.join(TEMPLATE_MATCHING_DIRECTORY_PATH, "template1.png")),
+    imread(os.path.join(TEMPLATE_MATCHING_DIRECTORY_PATH, "template2.png")),
+    imread(os.path.join(TEMPLATE_MATCHING_DIRECTORY_PATH, "template3.png")),
 ]
 THRESHOLD: float = 0.65
 
@@ -188,6 +188,7 @@ def try_run() -> None:
     :raises ValueError: Should not be raised (open an issue on GitHub if it happens).
     :raises Exception: For currently unknown exceptions (open an issue on GitHub if it happens).
     """
+    logging.info("NexusDownloadFlow is starting...")
     keep_logfile: bool = False
     try:
         keep_logfile = ask_to_keep_logfile()
@@ -202,7 +203,7 @@ def try_run() -> None:
         logging_report()
         keep_logfile = True
     except Exception as e:
-        logging.exception(e)
+        logging.error(e)
         logging_report()
         keep_logfile = True
     finally:

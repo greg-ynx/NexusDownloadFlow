@@ -9,7 +9,7 @@ from mss import mss
 from config.application_properties import PROJECT_VERSION
 from config.definitions import ISSUE_TEMPLATE_FILE_PATH
 from config.ndf_logging import logging_report, setup_logging, stop_logging
-from scripts.errors.error_messages import UNKNOWN_ERROR_MESSAGE
+
 
 __DEFAULT_ISSUE_FILE_NAME: str = ""
 __DEFAULT_ISSUE_FILE_EXTENSION: str = ".txt"
@@ -47,7 +47,7 @@ def cli_issue(issue_folder_path: str | None = None) -> None:
     except FileNotFoundError as e:
         logging.error(e)
     except Exception as e:
-        logging.error(f"{UNKNOWN_ERROR_MESSAGE}: {e}")
+        logging.error(e)
         logging_report()
     finally:
         stop_logging()
