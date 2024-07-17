@@ -1,3 +1,5 @@
+"""Remove template command module."""
+
 import logging
 import ntpath
 import os
@@ -6,18 +8,15 @@ from typing import List
 
 from _global.constants.messages import (
     CUSTOM_TEMPLATES_DIRECTORY_IS_NOT_A_DIRECTORY_ERROR_MESSAGE,
+    CUSTOM_TEMPLATES_FOLDER_DOES_NOT_EXIST_WARNING_MESSAGE,
     FILE_PATH_INVALID_FILE_ERROR_MESSAGE,
     NO_ACTION_REQUIRED_MESSAGE,
 )
 from config.definitions import CUSTOM_TEMPLATES_DIRECTORY_PATH
 from config.ndf_logging import logging_report, setup_logging, stop_logging
 
-
 __PATHS_NO_PATH_GIVEN_WARNING_MESSAGE: str = f"No path given in input. {NO_ACTION_REQUIRED_MESSAGE}"
 __DELETE_CUSTOM_TEMPLATES_FOLDER_START_MESSAGE: str = "Initiate custom_templates folder deletion..."
-__DELETE_CUSTOM_TEMPLATES_FOLDER_DOES_NOT_EXIST_WARNING_MESSAGE: str = (
-    f"The custom templates folder does not exist at '{CUSTOM_TEMPLATES_DIRECTORY_PATH}'. {NO_ACTION_REQUIRED_MESSAGE}"
-)
 __DELETE_CUSTOM_TEMPLATES_FOLDER_SUCCESS_MESSAGE: str = "The custom templates folder has been successfully deleted!"
 __GIVEN_PATH_NOT_IN_CUSTOM_TEMPLATES_DIRECTORY: str = (
     "File linked to given path '{path}' is not in custom_templates folder."
@@ -28,7 +27,7 @@ __DELETE_CUSTOM_TEMPLATE_FILE_SUCCESS_MESSAGE: str = (
 )
 
 
-def cli_remove_template(paths: List[str] | None, remove_all: bool = False) -> None:
+def cli_remove_templates(paths: List[str] | None, remove_all: bool = False) -> None:
     """Delete custom templates' directory."""
     setup_logging()
     try:
@@ -36,7 +35,7 @@ def cli_remove_template(paths: List[str] | None, remove_all: bool = False) -> No
             __delete_custom_templates_folder()
             return
         if not os.path.exists(CUSTOM_TEMPLATES_DIRECTORY_PATH):
-            logging.warning(__DELETE_CUSTOM_TEMPLATES_FOLDER_DOES_NOT_EXIST_WARNING_MESSAGE)
+            logging.warning(CUSTOM_TEMPLATES_FOLDER_DOES_NOT_EXIST_WARNING_MESSAGE)
             return
         if paths:
             for path in paths:
@@ -62,7 +61,7 @@ def __delete_custom_templates_folder() -> None:
         else:
             raise NotADirectoryError(CUSTOM_TEMPLATES_DIRECTORY_IS_NOT_A_DIRECTORY_ERROR_MESSAGE)
     else:
-        logging.warning(__DELETE_CUSTOM_TEMPLATES_FOLDER_DOES_NOT_EXIST_WARNING_MESSAGE)
+        logging.warning(CUSTOM_TEMPLATES_FOLDER_DOES_NOT_EXIST_WARNING_MESSAGE)
 
 
 def __delete_custom_template_file(path: str) -> None:

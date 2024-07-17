@@ -1,4 +1,4 @@
-"""Add templates command module."""
+"""Add template command module."""
 
 import imghdr
 import logging
@@ -14,12 +14,11 @@ from _global.constants.messages import (
 from config.definitions import CUSTOM_TEMPLATES_DIRECTORY_PATH
 from config.ndf_logging import logging_report, setup_logging, stop_logging
 
-
 # Messages
 __PATHS_NO_PATH_PROVIDED_ERROR_MESSAGE: str = "No path provided."
 
 __CLI_ADD_TEMPLATES_START_MESSAGE: str = "Initiate the addition of custom templates..."
-__CLI_ADD_TEMPLATES_SUCCESS_MESSAGE: str = "The user's templates have been successfully added to '{file_path}'."
+__CLI_ADD_TEMPLATES_SUCCESS_MESSAGE: str = "The user's template has been successfully added to '{file_path}'."
 
 
 def cli_add_templates(paths: List[str]) -> None:
