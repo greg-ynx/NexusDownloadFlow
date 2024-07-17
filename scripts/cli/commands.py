@@ -17,13 +17,19 @@ cli: Typer = typer.Typer(name="nexus-download-flow")
 
 
 @cli.callback(invoke_without_command=True)
-def run(ctx: typer.Context, mode: RunModeEnum = RunModeEnum.CLASSIC) -> None:
+def run(ctx: typer.Context, mode: Annotated[RunModeEnum, typer.Option("--mode", "-m")] = RunModeEnum.CLASSIC,
+        _version: Annotated[bool, typer.Option("-v")] = False) -> None:
     """
     Run the auto downloader.
 
+    :param _version: Version option
     :param ctx: Context for exclusive executable callback
     :param mode: Mode to launch_ndf the auto downloader (optional)
     """
+    if _version:
+        cli_version()
+        return
+
     if ctx.invoked_subcommand is None:
         cli_run(mode)
 
@@ -51,7 +57,7 @@ def clear_logs() -> None:
 
 
 @cli.command()
-def issue(issue_folder_path: Optional[str] = None) -> None:
+def issue(issue_folder_path: Annotated[Optional[str], typer.Option("--issue-folder-path", "-p")] = None) -> None:
     """
     Create an issue file for the user.
 
@@ -63,7 +69,7 @@ def issue(issue_folder_path: Optional[str] = None) -> None:
 @cli.command()
 def remove_templates(
     paths: Annotated[List[str] | None, typer.Argument()] = None,
-    remove_all: Annotated[bool, typer.Option("--all")] = False,
+    remove_all: Annotated[bool, typer.Option("--all", "-a")] = False,
 ) -> None:
     """
     Remove user's custom templates from Nexus Download Flow.
