@@ -140,6 +140,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# monitor-1.png temp file
-monitor-1.png
-
+# NDF specific ignored files
+screenshot.png
+issue.txt
+custom_templates/*
