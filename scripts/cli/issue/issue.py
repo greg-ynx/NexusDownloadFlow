@@ -1,3 +1,5 @@
+"""Issue file generator command module."""
+
 import logging
 import os.path
 import platform
@@ -9,7 +11,6 @@ from mss import mss
 from config.application_properties import PROJECT_VERSION
 from config.definitions import ISSUE_TEMPLATE_FILE_PATH
 from config.ndf_logging import logging_report, setup_logging, stop_logging
-
 
 __DEFAULT_ISSUE_FILE_NAME: str = ""
 __DEFAULT_ISSUE_FILE_EXTENSION: str = ".txt"
