@@ -5,13 +5,27 @@ from typing import Annotated, List, Optional
 import typer
 from typer import Typer
 
-from scripts.cli.add_templates.add_templates import cli_add_templates
+from scripts.cli.add_template.add_templates import cli_add_templates
 from scripts.cli.clear_logs.clear_logs import cli_clear_logs
 from scripts.cli.issue.issue import cli_issue
-from scripts.cli.remove_template.remove_template import cli_remove_template
+from scripts.cli.remove_template.remove_templates import cli_remove_templates
+from scripts.cli.run.run import cli_run
+from scripts.cli.run.run_mode_enum import RunModeEnum
 from scripts.cli.version.version import cli_version
 
 cli: Typer = typer.Typer(name="nexus-download-flow")
+
+
+@cli.callback(invoke_without_command=True)
+def run(ctx: typer.Context, mode: RunModeEnum = RunModeEnum.CLASSIC) -> None:
+    """
+    Run the auto downloader.
+
+    :param ctx: Context for exclusive executable callback
+    :param mode: Mode to launch_ndf the auto downloader (optional)
+    """
+    if ctx.invoked_subcommand is None:
+        cli_run(mode)
 
 
 @cli.command()
@@ -47,7 +61,7 @@ def issue(issue_folder_path: Optional[str] = None) -> None:
 
 
 @cli.command()
-def remove_template(
+def remove_templates(
     paths: Annotated[List[str] | None, typer.Argument()] = None,
     remove_all: Annotated[bool, typer.Option("--all")] = False,
 ) -> None:
@@ -57,4 +71,4 @@ def remove_template(
     :param paths: List of template paths to remove (optional)
     :param remove_all: A boolean flag to remove all templates included in the templates folder (optional)
     """
-    cli_remove_template(paths, remove_all)
+    cli_remove_templates(paths, remove_all)
