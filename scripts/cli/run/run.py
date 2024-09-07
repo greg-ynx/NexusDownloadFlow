@@ -5,7 +5,8 @@ import os
 from time import sleep
 from typing import Sequence, cast
 
-from cv2 import COLOR_BGR2GRAY, TM_CCOEFF_NORMED, Canny, cvtColor, imread, matchTemplate, minMaxLoc, resize
+import keyboard
+from cv2 import COLOR_BGR2GRAY, Canny, TM_CCOEFF_NORMED, cvtColor, imread, matchTemplate, minMaxLoc, resize
 from cv2.typing import MatLike
 from mss import mss
 from pyautogui import FAILSAFE_POINTS, FailSafeException, Point, leftClick, moveTo, position
@@ -54,6 +55,9 @@ __THRESHOLD: float = 0.65
 
 __RUN_STARTING_MESSAGE: str = "NexusDownloadFlow is starting..."
 __RUNNING_MESSAGE: str = "NexusDownloadFlow is running in {mode} mode."
+__PAUSE_NDF_MESSAGE: str = "NexusDownloadFlow is now paused..."
+__RESUME_NDF_MESSAGE: str = "NexusDownloadFlow has resumed..."
+__STOPPING_NDF_MESSAGE: str = "Stopping NexusDownloadFlow..."
 __EXITING_INFO_MESSAGE: str = "Exiting the program..."
 __FAILSAFE_ERROR_MESSAGE: str = "Fail-safe triggered from mouse moving to a corner of the screen."
 __SCREENSHOT_DOES_NOT_EXIST_MESSAGE: str = "The screenshot does not exist."
@@ -62,6 +66,9 @@ __PROGRAM_ENDED_MESSAGE: str = "Program ended."
 __CUSTOM_RUN_NO_CUSTOM_TEMPLATE_FOUND_ERROR_MESSAGE: str = (
     "No custom template found. Please add a custom template with the `add-template` command before trying again."
 )
+
+is_running: bool = False
+is_paused: bool = False
 
 
 def cli_run(mode: str) -> None:
@@ -116,6 +123,7 @@ def custom_run() -> None:
     custom_templates: list[MatLike] = __get_custom_templates()
     if custom_templates:
         launch_ndf(custom_templates)
+        return
     logging.error(__CUSTOM_RUN_NO_CUSTOM_TEMPLATE_FOUND_ERROR_MESSAGE)
 
 
@@ -127,9 +135,15 @@ def hybrid_run() -> None:
 
 def launch_ndf(templates: list[MatLike]) -> None:
     """Launch the auto-downloader."""
+    global is_running, is_paused
+    is_running = True
+
+    __init_hotkeys()
+
     edged_templates: list[MatLike] = __get_edged_templates(templates)
     with mss() as mss_instance:
-        while True:
+        while is_running:
+            __when_paused()
             monitors_size: dict[str, int] = mss_instance.monitors[0]
             monitors_left_top: tuple[int, int] = __if_monitors_left_top_present(monitors_size)
             screenshot: MatLike = imread(next(mss_instance.save(mon=-1, output=SCREENSHOT_PATH)))
@@ -171,6 +185,41 @@ def multiscale_match_template(
                 __click_on_target(target)
                 sleep(6)
                 return
+
+
+def pause_resume() -> None:
+    """
+    Pause or resume the auto download process.
+    """
+    global is_paused
+    if is_paused:
+        is_paused = False
+        logging.info(__RESUME_NDF_MESSAGE)
+    else:
+        is_paused = True
+        logging.info(__PAUSE_NDF_MESSAGE)
+
+
+def stop() -> None:
+    """
+    Stop the auto download process.
+    """
+    global is_running, is_paused
+    is_running = False
+    is_paused = False
+    logging.info(__STOPPING_NDF_MESSAGE)
+
+
+def __init_hotkeys() -> None:
+    """Initialize the hotkeys."""
+    keyboard.add_hotkey("F3", pause_resume)
+    keyboard.add_hotkey("F4", stop)
+
+
+def __when_paused() -> None:
+    global is_paused
+    while is_paused:
+        continue
 
 
 def __resize_screenshot(screenshot: MatLike, scale: float) -> MatLike:

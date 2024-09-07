@@ -8,7 +8,7 @@ from typer import Typer
 from scripts.cli.add_template.add_templates import cli_add_templates
 from scripts.cli.clear_logs.clear_logs import cli_clear_logs
 from scripts.cli.issue.issue import cli_issue
-from scripts.cli.remove_template.remove_templates import cli_remove_templates
+from scripts.cli.remove_templates.remove_templates import cli_remove_templates
 from scripts.cli.run.run import cli_run
 from scripts.cli.run.run_mode_enum import RunModeEnum
 from scripts.cli.version.version import cli_version
