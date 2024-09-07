@@ -5,7 +5,8 @@ import os
 from time import sleep
 from typing import Sequence, cast
 
-from cv2 import COLOR_BGR2GRAY, TM_CCOEFF_NORMED, Canny, cvtColor, imread, matchTemplate, minMaxLoc, resize
+import cv2
+import keyboard
 from cv2.typing import MatLike
 from mss import mss
 from pyautogui import FAILSAFE_POINTS, FailSafeException, Point, leftClick, moveTo, position
@@ -45,15 +46,18 @@ __SCALES: list[float] = [
 ]
 
 __DEFAULT_TEMPLATES: list[MatLike] = [
-    imread(os.path.join(TEMPLATE_MATCHING_DIRECTORY_PATH, "template1.png")),
-    imread(os.path.join(TEMPLATE_MATCHING_DIRECTORY_PATH, "template2.png")),
-    imread(os.path.join(TEMPLATE_MATCHING_DIRECTORY_PATH, "template3.png")),
+    cv2.imread(os.path.join(TEMPLATE_MATCHING_DIRECTORY_PATH, "template1.png")),
+    cv2.imread(os.path.join(TEMPLATE_MATCHING_DIRECTORY_PATH, "template2.png")),
+    cv2.imread(os.path.join(TEMPLATE_MATCHING_DIRECTORY_PATH, "template3.png")),
 ]
 
 __THRESHOLD: float = 0.65
 
 __RUN_STARTING_MESSAGE: str = "NexusDownloadFlow is starting..."
 __RUNNING_MESSAGE: str = "NexusDownloadFlow is running in {mode} mode."
+__PAUSE_NDF_MESSAGE: str = "NexusDownloadFlow is now paused..."
+__RESUME_NDF_MESSAGE: str = "NexusDownloadFlow has resumed..."
+__STOPPING_NDF_MESSAGE: str = "Stopping NexusDownloadFlow..."
 __EXITING_INFO_MESSAGE: str = "Exiting the program..."
 __FAILSAFE_ERROR_MESSAGE: str = "Fail-safe triggered from mouse moving to a corner of the screen."
 __SCREENSHOT_DOES_NOT_EXIST_MESSAGE: str = "The screenshot does not exist."
@@ -62,6 +66,9 @@ __PROGRAM_ENDED_MESSAGE: str = "Program ended."
 __CUSTOM_RUN_NO_CUSTOM_TEMPLATE_FOUND_ERROR_MESSAGE: str = (
     "No custom template found. Please add a custom template with the `add-template` command before trying again."
 )
+
+is_running: bool = False
+is_paused: bool = False
 
 
 def cli_run(mode: str) -> None:
@@ -107,19 +114,23 @@ def cli_run(mode: str) -> None:
 
 
 def classic_run() -> None:
+    """Launch classic execution method using built-in templates."""
     logging.info(__RUNNING_MESSAGE.format(mode=RunModeEnum.CLASSIC))
     launch_ndf(__DEFAULT_TEMPLATES)
 
 
 def custom_run() -> None:
+    """Launch custom execution method using user-provided templates."""
     logging.info(__RUNNING_MESSAGE.format(mode=RunModeEnum.CUSTOM))
     custom_templates: list[MatLike] = __get_custom_templates()
     if custom_templates:
         launch_ndf(custom_templates)
+        return
     logging.error(__CUSTOM_RUN_NO_CUSTOM_TEMPLATE_FOUND_ERROR_MESSAGE)
 
 
 def hybrid_run() -> None:
+    """Launch hybrid execution method using built-in and custom templates."""
     logging.info(__RUNNING_MESSAGE.format(mode=RunModeEnum.HYBRID))
     hybrid_templates: list[MatLike] = __DEFAULT_TEMPLATES + __get_custom_templates()
     launch_ndf(hybrid_templates)
@@ -127,13 +138,19 @@ def hybrid_run() -> None:
 
 def launch_ndf(templates: list[MatLike]) -> None:
     """Launch the auto-downloader."""
+    global is_running, is_paused
+    is_running = True
+
+    __init_hotkeys()
+
     edged_templates: list[MatLike] = __get_edged_templates(templates)
     with mss() as mss_instance:
-        while True:
+        while is_running:
+            __when_paused()
             monitors_size: dict[str, int] = mss_instance.monitors[0]
             monitors_left_top: tuple[int, int] = __if_monitors_left_top_present(monitors_size)
-            screenshot: MatLike = imread(next(mss_instance.save(mon=-1, output=SCREENSHOT_PATH)))
-            grayscale_screenshot: MatLike = cvtColor(screenshot, COLOR_BGR2GRAY)
+            screenshot: MatLike = cv2.imread(next(mss_instance.save(mon=-1, output=SCREENSHOT_PATH)))
+            grayscale_screenshot: MatLike = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
             multiscale_match_template(edged_templates, grayscale_screenshot, monitors_left_top)
 
 
@@ -149,7 +166,7 @@ def multiscale_match_template(
     """
     for scale in __SCALES:
         resized_screenshot: MatLike = __resize_screenshot(screenshot, scale)
-        edged_screenshot: MatLike = Canny(resized_screenshot, 50, 200)
+        edged_screenshot: MatLike = cv2.Canny(resized_screenshot, 50, 200)
         for template in templates:
             potential_match: tuple[float, Sequence[int]] = __get_potential_match(edged_screenshot, template)
             potential_match_value: float = potential_match[0]
@@ -173,17 +190,49 @@ def multiscale_match_template(
                 return
 
 
+def pause_resume() -> None:
+    """Pause or resume the auto download process."""
+    global is_paused
+    if is_paused:
+        is_paused = False
+        logging.info(__RESUME_NDF_MESSAGE)
+    else:
+        is_paused = True
+        logging.info(__PAUSE_NDF_MESSAGE)
+
+
+def stop() -> None:
+    """Stop the auto download process."""
+    global is_running, is_paused
+    is_running = False
+    is_paused = False
+    logging.info(__STOPPING_NDF_MESSAGE)
+
+
+def __init_hotkeys() -> None:
+    """Initialize the hotkeys."""
+    keyboard.add_hotkey("F3", pause_resume)
+    keyboard.add_hotkey("F4", stop)
+
+
+def __when_paused() -> None:
+    """Do nothing while the auto download process is paused."""
+    global is_paused
+    while is_paused:
+        continue
+
+
 def __resize_screenshot(screenshot: MatLike, scale: float) -> MatLike:
     """
     Resize the input screenshot.
 
-    :param screenshot: Screenshot to resize.
-    :param scale: The scale factor to resize the screenshot.
+    :param screenshot: Screenshot to cv2.resize.
+    :param scale: The scale factor to cv2.resize the screenshot.
     :return: Resized screenshot.
     """
     new_width: int = int(screenshot.shape[1] * scale)
     new_height: int = int(screenshot.shape[0] * scale)
-    return cast(MatLike, resize(screenshot, (new_width, new_height)))
+    return cast(MatLike, cv2.resize(screenshot, (new_width, new_height)))
 
 
 def __get_potential_match(screenshot: MatLike, template: MatLike) -> tuple[float, Sequence[int]]:
@@ -194,8 +243,8 @@ def __get_potential_match(screenshot: MatLike, template: MatLike) -> tuple[float
     :param template: Template to match.
     :return: Tuple of potential match value and location.
     """
-    matches: MatLike = matchTemplate(screenshot, template, TM_CCOEFF_NORMED)
-    potential_match: tuple[float, float, Sequence[int], Sequence[int]] = minMaxLoc(matches)
+    matches: MatLike = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
+    potential_match: tuple[float, float, Sequence[int], Sequence[int]] = cv2.minMaxLoc(matches)
     max_value: float = potential_match[1]
     max_location: Sequence[int] = potential_match[3]
     return max_value, max_location
@@ -250,7 +299,7 @@ def __get_custom_templates() -> list[MatLike]:
         logging.warning(CUSTOM_TEMPLATES_FOLDER_DOES_NOT_EXIST_WARNING_MESSAGE)
         return []
     templates: list[MatLike] = [
-        imread(custom_template) for custom_template in os.listdir(CUSTOM_TEMPLATES_DIRECTORY_PATH)
+        cv2.imread(custom_template) for custom_template in os.listdir(CUSTOM_TEMPLATES_DIRECTORY_PATH)
     ]
     if not templates:
         logging.warning(CUSTOM_TEMPLATES_FOLDER_EMPTY_WARNING_MESSAGE)
@@ -264,4 +313,4 @@ def __get_edged_templates(templates: list[MatLike]) -> list[MatLike]:
 
     :return: List of edged templates.
     """
-    return [Canny(cvtColor(template, COLOR_BGR2GRAY), __EDGE_MIN_VALUE, __EDGE_MAX_VALUE) for template in templates]
+    return [cv2.Canny(cv2.cvtColor(template, cv2.COLOR_BGR2GRAY), __EDGE_MIN_VALUE, __EDGE_MAX_VALUE) for template in templates]

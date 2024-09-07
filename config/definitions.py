@@ -69,4 +69,4 @@ with open(PYPROJECT_PATH, "rb") as pyproject:
     PYPROJECT_DATA: dict[str, Any] = tomllib.load(pyproject)
     PROJECT_DATA: dict[str, Any] = PYPROJECT_DATA.get("project")  # type: ignore
     GITHUB_DATA: dict[str, str] = PYPROJECT_DATA.get("github")  # type: ignore
-    GITHUB_ISSUE_VALUE: str = GITHUB_DATA.get("issues")  # type: ignore
+    GITHUB_ISSUE_VALUE: str = str(GITHUB_DATA.get("issues"))
