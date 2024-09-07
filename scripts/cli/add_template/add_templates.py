@@ -22,6 +22,11 @@ __CLI_ADD_TEMPLATES_SUCCESS_MESSAGE: str = "The user's template has been success
 
 
 def cli_add_templates(paths: List[str]) -> None:
+    """
+    Add custom templates.
+
+    :param paths: Path list of the templates.
+    """
     setup_logging()
     try:
         logging.info(__CLI_ADD_TEMPLATES_START_MESSAGE)

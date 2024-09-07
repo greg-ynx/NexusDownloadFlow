@@ -1,7 +1,7 @@
 """Print NexusDownloadFlow ascii art."""
 import sys
 
-from config.definitions import PROJECT_DATA
+from config.application_properties import PROJECT_VERSION
 
 __ASCII_COLOR: str = "\033[33m"
 __ASCII_TEXT: str = """
@@ -19,7 +19,7 @@ ______                    _                 _  ______ _
 |___/ \\___/ \\_/\\_/ |_| |_|_|\\___/ \\__,_|\\__,_| \\_|   |_|\\___/ \\_/\\_/\
 """
 
-__PROJECT_VERSION: str = "v{0}".format(str(PROJECT_DATA.get("version")))
+__PROJECT_VERSION: str = "v{0}".format(PROJECT_VERSION)
 
 
 def print_ascii_art() -> None:
