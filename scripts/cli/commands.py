@@ -13,12 +13,26 @@ from scripts.cli.run.run import cli_run
 from scripts.cli.run.run_mode_enum import RunModeEnum
 from scripts.cli.version.version import cli_version
 
+RUN_MODE_DEFAULT_VALUE = RunModeEnum.CLASSIC
+RUN_MODE_NAME = "--mode"
+RUN_MODE_SHORT_NAME = "-m"
+RUN_MODE_HELP = "Execution mode for Nexus Download Flow"
+RUN_VERSION_SHORTNAME = "-v"
+RUN_VERSION_HELP = "Print the current version number of Nexus Download Flow."
+
 cli: Typer = typer.Typer(name="nexus-download-flow")
 
 
 @cli.callback(invoke_without_command=True)
-def run(ctx: typer.Context, mode: Annotated[RunModeEnum, typer.Option("--mode", "-m")] = RunModeEnum.CLASSIC,
-        _version: Annotated[bool, typer.Option("-v")] = False) -> None:
+def run(ctx: typer.Context,
+        mode: Annotated[
+            RunModeEnum,
+            typer.Option(RUN_MODE_NAME, RUN_MODE_SHORT_NAME, help=RUN_MODE_HELP)
+        ] = RUN_MODE_DEFAULT_VALUE,
+        _version: Annotated[
+            bool,
+            typer.Option(RUN_VERSION_SHORTNAME, help=RUN_VERSION_HELP)
+        ] = False) -> None:
     """
     Run the auto downloader.
 
