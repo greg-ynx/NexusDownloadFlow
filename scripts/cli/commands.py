@@ -5,7 +5,7 @@ from typing import Annotated, List, Optional
 import typer
 from typer import Typer
 
-from scripts.cli.add_template.add_templates import cli_add_templates
+from scripts.cli.add_templates.add_templates import cli_add_templates
 from scripts.cli.clear_logs.clear_logs import cli_clear_logs
 from scripts.cli.issue.issue import cli_issue
 from scripts.cli.remove_templates.remove_templates import cli_remove_templates

@@ -1,4 +1,4 @@
-"""Add template command module."""
+"""Add templates command module."""
 
 import imghdr
 import logging

@@ -144,4 +144,5 @@ cython_debug/
 screenshot.png
 issue.txt
 custom_templates/*
-docs/*
+.distribution/*
+__init__.py
