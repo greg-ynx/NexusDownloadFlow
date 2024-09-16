@@ -16,6 +16,9 @@ Available Modes:
 3. Hybrid Mode
    Combines both default and custom templates.
 
+You can control NexusDownloadFlow (NDF) during the download process with keyboard shortcuts:
+press F3 to `pause` or `resume` the download, and F4 to `stop` NDF at any time.
+
 ## Version Command
 
 The `version` command allows users to quickly check which version of NexusDownloadFlow they are using.
