@@ -6,15 +6,11 @@ is an automated downloader designed to simplify the process of downloading mod l
 By automatically handling the download process,
 it saves time and effort for users who frequently manage large collections of mods.
 
----
-
 ## Install
 
 Download the latest version [here](https://github.com/greg-ynx/NexusDownloadFlow/releases).
 NDF is only available for Windows as an executable.
 If you wish to use it on another OS then download the project and run it with Python.
-
----
 
 ## Usage
 
@@ -110,8 +106,6 @@ If you want to remove all custom templates at once, you can use the `--all` opti
 .\NexusDownloadFlow.exe remove-templates --all
 ```
 
----
-
 ## Feature
 
 ### Run Command
@@ -120,8 +114,9 @@ The run feature is the core of NexusDownloadFlow (NDF),
 allowing users to launch the automation process for downloading mods from Nexus Mods.
 With this feature, users can choose between three distinct launch modes depending on their needs and preferences.
 
-1. Available Modes:
-   Classic Mode (default)
+Available Modes:
+
+1. Classic Mode (default)
    Runs the automation using the default templates provided by NDF.
 
 2. Custom Mode
@@ -172,8 +167,6 @@ To generate the issue form, use:
 ```bash
 .\NexusDownloadFlow issue
 ```
-
----
 
 ## Development requirements
 
