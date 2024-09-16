@@ -33,6 +33,7 @@ If you wish to use it on another OS then download the project and run it with Py
 ### Basic Usage
 
 While running `Wabbajack` modlist installer (for example), run `NexusDownloadFlow.exe`.
+
 NDF should click on the `Slow download` button, automating the download process.
 
 ### Command-Line Interface (CLI) Usage
@@ -140,6 +141,9 @@ Available Modes:
 
 3. Hybrid Mode
    Combines both default and custom templates.
+
+You can control NexusDownloadFlow (NDF) during the download process with keyboard shortcuts:
+press F3 to `pause` or `resume` the download, and F4 to `stop` NDF at any time.
 
 ### Version Command
 
