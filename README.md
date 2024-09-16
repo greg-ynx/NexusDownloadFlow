@@ -6,6 +6,22 @@ is an automated downloader designed to simplify the process of downloading mod l
 By automatically handling the download process,
 it saves time and effort for users who frequently manage large collections of mods.
 
+If NDF has been helpful for you when downloading mod lists, consider giving the repository 
+a star :star: on GitHub to show your support!
+
+## How Does It Work?
+
+NexusDownloadFlow operates using computer vision principles, leveraging the power of OpenCV
+and a template matching algorithm. This approach allows NDF to visually identify and interact
+with the necessary buttons on the Nexus Mods website, such as:
+
+- The `Slow download` button
+- The `Click here` button
+
+By automatically detecting these buttons, NDF simulates user clicks, allowing the mods to 
+be downloaded without any manual intervention. This process enables seamless automation of
+the mod downloading workflow, ensuring reliability and efficiency.
+
 ## Install
 
 Download the latest version [here](https://github.com/greg-ynx/NexusDownloadFlow/releases).
