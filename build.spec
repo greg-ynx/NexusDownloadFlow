@@ -1,7 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 extra_files = [
-    ('assets/*', 'assets'),
+    ('assets/template_matching/*', 'assets/template_matching/'),
+    ('assets/issue/*', 'assets/issue/'),
     ('pyproject.toml', '.')
 ]
 
