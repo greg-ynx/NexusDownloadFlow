@@ -4,9 +4,11 @@ import logging
 import os
 from time import sleep
 from typing import Sequence, cast
+import pyscreenshot as ImageGrab  # type:ignore
+import subprocess
 
 import cv2
-import keyboard
+#import keyboard
 from cv2.typing import MatLike
 from mss import mss
 from pyautogui import FAILSAFE_POINTS, FailSafeException, Point, leftClick, moveTo, position
@@ -98,10 +100,10 @@ def cli_run(mode: str) -> None:
     except FailSafeException:
         logging.error(__FAILSAFE_ERROR_MESSAGE)
     except ValueError as e:
-        logging.error(e)
+        logging.exception(e)
         logging_report()
     except Exception as e:
-        logging.error(e)
+        logging.exception(e)
         logging_report()
     finally:
         if os.path.exists(SCREENSHOT_PATH):
@@ -141,18 +143,103 @@ def launch_ndf(templates: list[MatLike]) -> None:
     global is_running, is_paused
     is_running = True
 
-    __init_hotkeys()
+ #   __init_hotkeys()
 
     edged_templates: list[MatLike] = __get_edged_templates(templates)
     with mss() as mss_instance:
         while is_running:
             __when_paused()
+
+
             monitors_size: dict[str, int] = mss_instance.monitors[0]
             monitors_left_top: tuple[int, int] = __if_monitors_left_top_present(monitors_size)
-            screenshot: MatLike = cv2.imread(next(mss_instance.save(mon=-1, output=SCREENSHOT_PATH)))
+            #screenshot: MatLike = cv2.imread(next(mss_instance.save(mon=-1, output=SCREENSHOT_PATH)))
+            screenshot: Matlike = takescreen()
             grayscale_screenshot: MatLike = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
             multiscale_match_template(edged_templates, grayscale_screenshot, monitors_left_top)
 
+def takescreen() -> MatLike:
+    # img_complete = ImageGrab.grab(backend="gnome-screenshot")
+    img_complete = ImageGrab.grab()
+    monitors = _get_monitor_infos()
+    #img_complete.show()
+    for idx, position in enumerate(monitors):
+        img = img_complete.crop(
+            (
+                position["left"],
+                position["top"],
+                position["left"] + position["width"],
+                position["top"] + position["height"],
+            )
+        )
+        img.save("screenshot.png")
+        return cv2.imread("screenshot.png")
+
+def _get_monitor_infos():
+    """Retrieve monitor positions and dimensions using xrandr.
+
+    DEMO OUTPUTS of `xrandr --listactivemonitors`:
+
+    -- on multi monitor --
+    Monitors: 3
+    0: +*DP-1-2-2 1920/521x1080/293+1050+270  DP-1-2-2
+    1: +DP-1-2-1 1920/510x1080/290+2970+270  DP-1-2-1
+    2: +DP-1-2-3 1050/473x1680/297+0+0  DP-1-2-3
+    -------------------
+    -- on single monitor--
+    Monitors: 1
+        0: +XWAYLAND0 944/250x997/264+0+0  XWAYLAND0
+    -------------------
+
+    Raises:
+        ValueError: Raised when xrandr exits with error
+
+    Returns:
+        list -- List of position dicts with keys {top, left, width, height}
+
+    """
+
+    # Execute xrandr:
+    p = subprocess.Popen(
+        "xrandr --listactivemonitors",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    proc_lines = p.stdout.readlines()
+    proc_code = p.wait()
+    if proc_code != 0:
+        raise ValueError(f"xrandr error: {proc_code}\nOutput:{proc_lines}")
+
+    # Parse result
+    monitors = []
+    proc_lines.pop(0)
+    for line in proc_lines:
+        line = line.decode()
+
+        sections = line.split()
+        print("Line: ", line)
+        # 0       1                 2                   3
+        # 0: +*DP-1-2-2 1920/521x1080/293clean
+
+        dim_section = sections[2]
+        dim = dim_section.split("/")
+        #   0      1          2
+        # 1920/521x1080/293+1050+270
+
+        pos = dim[2].split("+")
+        #  0    1   2
+        # 293+1050+270
+
+        position = {
+            "width": int(dim[0]),
+            "height": int(dim[1].split("x")[1]),
+            "left": int(pos[1]),
+            "top": int(pos[2]),
+        }
+        monitors.append(position)
+
+    return monitors
 
 def multiscale_match_template(
     templates: list[MatLike], screenshot: MatLike, left_top_coordinates: tuple[int, int]
@@ -209,10 +296,10 @@ def stop() -> None:
     logging.info(__STOPPING_NDF_MESSAGE)
 
 
-def __init_hotkeys() -> None:
+#def __init_hotkeys() -> None:
     """Initialize the hotkeys."""
-    keyboard.add_hotkey("F3", pause_resume)
-    keyboard.add_hotkey("F4", stop)
+#    keyboard.add_hotkey("F3", pause_resume)
+ #   keyboard.add_hotkey("F4", stop)
 
 
 def __when_paused() -> None:
